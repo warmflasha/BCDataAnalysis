@@ -3,8 +3,8 @@
 % name in the corresponding entry in outfiles. 
 
 
-indirec = 'unity_data_oct';
-outdirec = 'oct_combined';
+indirec = 'unity_data_jan_17';
+outdirec = 'jan_combined';
 keywords = {'batteries','balanc','delayed','digit_span','digit_sym','ebbing','flanker',...
     'stroop','trails','assessments','symptoms','users_2'};
 outfiles = {'battery','balance','recall','digit_span','digit_symbol','ebbinghaus',...
