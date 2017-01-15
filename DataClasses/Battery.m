@@ -141,7 +141,7 @@ classdef Battery < handle
             end
         end
         
-        function rtc=flanker_reaction_time_correct_meann(obj)
+        function rtc=flanker_reaction_time_correct_mean(obj)
             %needs to be at least 80% correct to score. otherwise NaN.
             
             if obj.flanker_fraction_correct > 0.8
