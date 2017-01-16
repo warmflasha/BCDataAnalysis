@@ -1,3 +1,4 @@
+
 classdef Flanker
     %Data class to store Flanker results
     properties

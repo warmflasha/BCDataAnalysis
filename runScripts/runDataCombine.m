@@ -3,7 +3,7 @@
 % name in the corresponding entry in outfiles. 
 
 
-indirec = 'unity_data_jan_17';
+indirec = '/Users/Niha/Dropbox/Concussion_v3/unity_data_jan_17';
 outdirec = 'jan_combined';
 keywords = {'batteries','balanc','delayed','digit_span','digit_sym','ebbing','flanker',...
     'stroop','trails','assessments','symptoms','users_2'};
