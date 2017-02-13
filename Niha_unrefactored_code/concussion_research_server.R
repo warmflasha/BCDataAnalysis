@@ -1,0 +1,115 @@
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(lubridate)
+library(tidyr)
+library(stringr)
+library(pipefittr)
+library(janitor)
+library(purrr)
+
+load_batteries <- function(mypath = "/Users/Niha/Desktop/Braincheck/research_server/batteries_2017-02-03_22h48m55.csv"){
+  mydf <- read.csv(mypath, stringsAsFactors = FALSE)
+  return(mydf)
+}
+load_users <- function(mypath = "/Users/Niha/Desktop/Braincheck/research_server/users_2017-02-03_22h48m54.csv") {
+  mydf <- read.csv(mypath, stringsAsFactors = FALSE)
+  return(mydf)
+}
+
+clean_user_scores <- function(user_scores) {
+  user_scores %>% gsub("\\{", "", .) %>%
+    gsub('")"', '', .) %>%
+    gsub("\\}", "", .) %>% 
+    gsub('\\"', '', .) %>%
+    trimws()
+  
+} 
+
+# get_key_val <- function(score_chunk) {
+#   key_val <- str_split(score_chunk, "=>") %>%
+#     unlist() %>% trimws()
+#   names(key_val) <- c("key", "val")
+#   result <- c(key_val['val'])
+#   names(result) <- key_val['key']
+#   return(result)
+# }
+
+####Data Filtering###################
+
+batteries <- load_batteries() %>% clean_names() %>%
+  select(id, user_id, battery_type_id, organization_id, baseline, incomplete, raw_scores, device_model) %>%
+  rename(battery_id = id) %>%
+  filter(incomplete == 'f')
+
+users <- load_users() %>% clean_names() %>%
+  select(id, gender, date_of_birth) %>%
+  rename(user_id = id) %>%
+  filter(!date_of_birth == "") %>%
+  mutate(date_of_birth = ymd(date_of_birth)) 
+current_time <- now()
+users$age <- year(as.period(interval(ymd(users$date_of_birth), current_time)))
+dat <- users %>% left_join(batteries) %>%
+  select(battery_id, user_id,age, gender, battery_type_id, organization_id,baseline, device_model, raw_scores ) %>%
+  filter(!raw_scores == "", baseline == 't')
+
+dat$raw_scores <- clean_user_scores(dat$raw_scores) 
+
+###Split up dat into memory vs. concussion product
+test_modules <- c("stroop_reaction_time_incongruent_median", "digit_symbol_duration_median", "immediate_recall_correct", "delayed_recall_correct", "balance_mean_distance_from_center", "trails_b_duration_mean", "flanker_reaction_time_correct_median")
+organizations <- c(16)
+#############CONCUSSION ANALYSIS#####################################
+concussion <- dat %>% filter(battery_type_id == 1, organization_id %in% organizations)
+################################################################################### 
+score_chunks <- concussion[,c("battery_id", "raw_scores")]
+
+split_key_val <- function(raw_scores){
+  test_dat <- raw_scores %>% str_replace_all(., "[\r\n]" , "") %>%
+    str_split(",") %>%
+    unlist() %>%
+    str_split("=>") %>%
+    unlist() %>%
+    matrix(ncol=2,byrow=T) %>%
+    data.frame(stringsAsFactors=F)
+  return(test_dat)
+}
+
+raw_scores_row_1 <- (split_key_val(score_chunks$raw_scores[[1]]))
+clean_scores_row_1 <- raw_scores_row_1[, 2]
+names(clean_scores_row_1) <- raw_scores_row_1[,1]  %>% clean_user_scores()
+clean_scores_df <- data.frame(clean_scores_row_1, stringsAsFactors = F) %>%
+  t() %>%
+  data.frame(stringsAsFactors = F)
+clean_scores_df$battery_id <-score_chunks[1,]$battery_id
+
+
+for(i in 2:nrow(score_chunks)) {
+  key_val <- split_key_val(score_chunks$raw_scores[[i]]) ##dataframe
+  clean_scores_row <- key_val[ ,2] ##character vector of number scores
+  names(clean_scores_row) <- key_val[,1] %>% clean_user_scores() ##character vector with number scores named
+  clean_scores_row <- data.frame(clean_scores_row, stringsAsFactors=FALSE)  %>%
+    t() %>%
+    data.frame(stringsAsFactors = F)
+  clean_scores_row$battery_id <- score_chunks[i,]$battery_id ##assigning user_id of row to dataframe
+  clean_scores_df<- merge(clean_scores_df, clean_scores_row, all = TRUE)
+  
+}
+
+clean_scores_df <- clean_scores_df %>% select( stroop_reaction_time_incongruent_median, digit_symbol_duration_median, immediate_recall_correct, delayed_recall_correct, balance_mean_distance_from_center, trails_b_duration_mean, flanker_reaction_time_correct_median, battery_id)
+
+
+combined <- concussion %>% left_join(clean_scores_df, by = "battery_id") %>%
+                select(-c( battery_type_id, organization_id, baseline, raw_scores))
+
+
+combined %>% group_by(gender) %>%
+  summarise(n = n())  
+
+write.csv(combined, file = "concussion_research_data.csv")
+
+
+#################################################################################################
+
+
+
+

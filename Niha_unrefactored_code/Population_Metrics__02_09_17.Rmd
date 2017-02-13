@@ -1,0 +1,1388 @@
+---
+title: "Population Metrics 2/9"
+author: "Niha Pereira"
+date: "2/9/2017"
+output: 
+  flexdashboard::flex_dashboard:
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(lubridate)
+library(tidyr)
+library(stringr)
+library(pipefittr)
+library(janitor)
+library(purrr)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+load_concussion <- function(mypath = "/Users/Niha/Desktop/Braincheck/Code/combined_concussion.csv"){
+  mydf <- read.csv(mypath, stringsAsFactors = FALSE)
+  return(mydf)
+}
+
+load_memory <- function(mypath ="/Users/Niha/Desktop/Braincheck/Code/memory_cleaned_up.csv"){
+  mydf <- read.csv(mypath, stringsAsFactors = FALSE)
+  return(mydf)
+}
+
+load_new_stuff <- function(mypath ="/Users/Niha/Desktop/new_stuff.csv" ){
+  mydf <- read.csv(mypath, stringsAsFactors = FALSE)
+  return(mydf)
+}
+
+load_new_iphone_stuff <- function(mypath ="/Users/Niha/Desktop/new_iphone_stuffs.csv" ){
+  mydf <- read.csv(mypath, stringsAsFactors = FALSE)
+  return(mydf)
+}
+
+
+trails_metrics <- function(bucket_device){
+ a <- c(nrow(bucket_device), mean(bucket_device$trails_b_duration_mean),
+        sd(bucket_device$trails_b_duration_mean))
+ names(a) <- c("N", "MEAN", "SD")
+ return(a)
+}
+
+trails_plot <- function(bucket, title) {
+  trails <- bucket %>%
+              group_by(trails_b_duration_mean) %>%
+              summarise(n = n()) 
+  
+  s <- ggplot(trails, aes(x = trails_b_duration_mean))
+  s<- s + ylab("Frequency") +  ggtitle(title) + geom_histogram(colour = "black", fill = "#FF9999", binwidth = .15)   + theme_classic() 
+  return(s)
+}
+  
+trails_device_age_bucket <- function(device, age_bucket) {
+  bucket <- device %>% filter(age %in% age_bucket) %>%
+    select(trails_b_duration_mean)
+    metrics <- trails_metrics(bucket)
+    return(metrics)
+}
+
+stroop_plot <- function(bucket, title) {
+  stroop <- bucket %>%
+              group_by(stroop_reaction_time_incongruent_median) %>%
+              summarise(n = n()) 
+  
+  s <- ggplot(stroop, aes(x = stroop_reaction_time_incongruent_median))
+  s<- s + ylab("Frequency") +  ggtitle(title) + geom_histogram(colour = "black", fill = "#FF9999", binwidth = .1)   + theme_classic() 
+  return(s)
+}
+  
+stroop_metrics <- function(bucket_device){
+ a <- c(nrow(bucket_device), mean(bucket_device$stroop_reaction_time_incongruent_median),
+        sd(bucket_device$stroop_reaction_time_incongruent_median))
+ names(a) <- c("N", "MEAN", "SD")
+ return(a)
+}
+      
+stroop_device_age_bucket <- function(device, age_bucket) {
+  bucket <- device %>% filter(age %in% age_bucket) %>%
+    select(stroop_reaction_time_incongruent_median)
+    metrics <- stroop_metrics(bucket)
+    return(metrics)
+}
+
+immediate_recall_plot <- function(bucket, title) {
+  immediate_recall <- bucket %>%
+              group_by(immediate_recall_correct) %>%
+              summarise(n = n()) 
+  
+  s <- ggplot(immediate_recall, aes(x = immediate_recall_correct))
+  s<- s + ylab("Frequency") +  ggtitle(title) + geom_histogram(colour = "black", fill = "#FF9999", binwidth = .15)   + theme_classic() 
+  return(s)
+}
+  
+immediate_recall_metrics <- function(bucket_device){
+ a <- c(nrow(bucket_device), mean(bucket_device$immediate_recall_correct),
+        sd(bucket_device$immediate_recall_correct))
+ names(a) <- c("N", "MEAN", "SD")
+ return(a)
+}
+      
+immediate_recall_age_bucket <- function(device, age_bucket) {
+  bucket <- device %>% filter(age %in% age_bucket) %>%
+    select(immediate_recall_correct)
+    metrics <- immediate_recall_metrics(bucket)
+    return(metrics)
+}
+
+flanker_plot <- function(bucket, title) {
+  flanker <- bucket %>%
+              group_by(flanker_reaction_time_correct_median) %>%
+              summarise(n = n()) 
+  
+  s <- ggplot(flanker, aes(x = flanker_reaction_time_correct_median))
+  s<- s + ylab("Frequency") +  ggtitle(title) + geom_histogram(colour = "black", fill = "#FF9999", binwidth = .15)   + theme_classic() 
+  return(s)
+}
+  
+flanker_metrics <- function(bucket_device){
+ a <- c(nrow(bucket_device), mean(bucket_device$flanker_reaction_time_correct_median),
+        sd(bucket_device$flanker_reaction_time_correct_median))
+ names(a) <- c("N", "MEAN", "SD")
+ return(a)
+}
+      
+flanker_device_age_bucket <- function(device, age_bucket) {
+  bucket <- device %>% filter(age %in% age_bucket) %>%
+    select(flanker_reaction_time_correct_median)
+    metrics <- flanker_metrics(bucket)
+    return(metrics)
+}
+
+digit_symbol_plot <- function(bucket, title) {
+  digit_symbol <- bucket %>%
+              group_by(digit_symbol_duration_median) %>%
+              summarise(n = n()) 
+  
+  s <- ggplot(digit_symbol, aes(x = digit_symbol_duration_median))
+  s<- s + ylab("Frequency") +  ggtitle(title) + geom_histogram(colour = "black", fill = "#FF9999", binwidth = .15)   + theme_classic() 
+  return(s)
+}
+  
+digit_symbol_metrics <- function(bucket_device){
+ a <- c(nrow(bucket_device), mean(bucket_device$digit_symbol_duration_median),
+        sd(bucket_device$digit_symbol_duration_median))
+ names(a) <- c("N", "MEAN", "SD")
+ return(a)
+}
+      
+digit_symbol_age_bucket <- function(device, age_bucket) {
+  bucket <- device %>% filter(age %in% age_bucket) %>%
+    select(digit_symbol_duration_median)
+    metrics <- digit_symbol_metrics(bucket)
+    return(metrics)
+}
+
+
+delayed_recall_plot <- function(bucket, title) {
+  delayed_recall <- bucket %>%
+              group_by(delayed_recall_correct) %>%
+              summarise(n = n()) 
+  
+  s <- ggplot(delayed_recall, aes(x = delayed_recall_correct))
+  s<- s + ylab("Frequency") +  ggtitle(title) + geom_histogram(colour = "black", fill = "#FF9999", binwidth = .2)   + theme_classic() 
+  return(s)
+}
+  
+delayed_recall_metrics <- function(bucket_device){
+ a <- c(nrow(bucket_device), mean(bucket_device$delayed_recall_correct),
+        sd(bucket_device$delayed_recall_correct))
+ names(a) <- c("N", "MEAN", "SD")
+ return(a)
+}
+      
+delayed_recall_device_age_bucket <- function(device, age_bucket) {
+  bucket <- device %>% filter(age %in% age_bucket) %>%
+    select(delayed_recall_correct)
+    metrics <- delayed_recall_metrics(bucket)
+    return(metrics)
+}
+
+balance_plot <- function(bucket, title) {
+  balance <- bucket %>%
+              group_by(balance_mean_distance_from_center) %>%
+              summarise(n = n()) 
+  
+  s <- ggplot(balance, aes(x = balance_mean_distance_from_center))
+  s<- s + ylab("Frequency") +  ggtitle(title) + geom_histogram(colour = "black", fill = "#FF9999", binwidth = .5)   + theme_classic() 
+  return(s)
+}
+  
+balance_metrics <- function(bucket_device){
+ a <- c(nrow(bucket_device), mean(bucket_device$balance_mean_distance_from_center),
+        sd(bucket_device$balance_mean_distance_from_center))
+ names(a) <- c("N", "MEAN", "SD")
+ return(a)
+}
+      
+balance_device_age_bucket <- function(device, age_bucket) {
+  bucket <- device %>% filter(age %in% age_bucket)%>%
+    select(balance_mean_distance_from_center)
+    metrics <- balance_metrics(bucket)
+    return(metrics)
+}
+
+##################
+concussion <- load_concussion()
+memory <- load_memory() %>% select(battery_id, user_id, age, device_model,stroop_reaction_time_incongruent_median, digit_symbol_duration_median, immediate_recall_correct, delayed_recall_correct, trails_b_duration_mean)
+
+new_things <- load_new_stuff() %>% select(battery_id, user_id, age, device_model,stroop_reaction_time_incongruent_median, digit_symbol_duration_median, immediate_recall_correct, delayed_recall_correct, trails_b_duration_mean)
+
+
+new_iphone_things <- load_new_iphone_stuff()%>% select(battery_id, user_id, age, device_model,stroop_reaction_time_incongruent_median, digit_symbol_duration_median, immediate_recall_correct, delayed_recall_correct, trails_b_duration_mean)
+
+concussion_memory_combined <- concussion %>% full_join(memory) %>% select(-(X))
+everything <- concussion_memory_combined %>% full_join(new_things) %>% full_join(new_iphone_things)
+everything <- unique(everything)
+View(everything)
+
+
+ages <- c(nrow(everything %>% filter(age %in% 10:13)), nrow(everything %>% filter(age %in% 14:18)), nrow(everything %>% filter(age %in% 19:35)),nrow(everything %>% filter(age %in% 36:50)), nrow(everything %>% filter(age %in% 51:60)), nrow(everything %>% filter(age %in% 60:120)))
+
+balance <- everything %>% select(balance_mean_distance_from_center, age, device_model) %>% drop_na() %>% filter(grepl("iPhone", device_model))  %>% filter(age %in% 60:120) 
+
+nrow(balance)
+mean(balance$balance_mean_distance_from_center)
+sd(balance$balance_mean_distance_from_center)
+
+
+
+```
+
+```{r devices, echo=FALSE, message=FALSE, warning=FALSE}
+iPhone <- everything %>% filter(grepl("iPhone", device_model))
+iPad <- everything %>% filter(grepl("iPad", device_model))
+browser <- everything %>% filter(device_model == "browser")
+```
+##IPhone
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(iPhone, 10:13)
+plot_1_iPhone_trails <- trails_plot(iPhone %>% filter(age %in% 10:13), "Ages 10-13")
+plot_1_iPhone_trails
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(iPhone, 14:18)
+plot_2_iPhone_trails <- trails_plot(iPhone %>% filter(age %in% 14:18), "Ages 14-18")
+plot_2_iPhone_trails
+```  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(iPhone, 19:35)
+plot_3_iPhone_trails <- trails_plot(iPhone %>% filter(age %in% 19:35), "Ages 19-24")
+plot_3_iPhone_trails
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(iPhone, 24:35)
+plot_4_iPhone_trails <- trails_plot(iPhone %>% filter(age %in% 24:35), "Ages 24-35")
+plot_4_iPhone_trails
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(iPhone, 36:50)
+plot_5_iPhone_trails <- trails_plot(iPhone %>% filter(age %in% 36:50), "Ages 36-50")
+plot_5_iPhone_trails
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(iPhone, 51:65)
+plot_6_iPhone_trails <- trails_plot(iPhone %>% filter(age %in% 51:65), "Ages 51-65")
+plot_6_iPhone_trails
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(iPhone, 66:120)
+plot_7_iPhone_trails <- trails_plot(iPhone %>% filter(age %in% 66:120), "Ages 66-75")
+plot_7_iPhone_trails
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(iPhone, 76:85)
+plot_8_iPhone_trails <- trails_plot(iPhone %>% filter(age %in% 76:85), "Ages 76-85")
+plot_8_iPhone_trails
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(iPhone, 86:120)
+plot_9_iPhone_trails <- trails_plot(iPhone %>% filter(age %in% 86:120), "Ages 86-120")
+plot_9_iPhone_trails
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(iPhone, 10:13)
+plot_1_iPhone_stroop <- stroop_plot(iPhone %>% filter(age %in% 10:13), "Ages 10-13")
+plot_1_iPhone_stroop
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(iPhone, 14:18)
+plot_2_iPhone_stroop <- stroop_plot(iPhone %>% filter(age %in% 14:18), "Ages 14-18")
+plot_2_iPhone_stroop
+```  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(iPhone, 19:35)
+plot_3_iPhone_stroop <- stroop_plot(iPhone %>% filter(age %in% 19:35), "Ages 19-24")
+plot_3_iPhone_stroop
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(iPhone, 24:35)
+plot_4_iPhone_stroop <- stroop_plot(iPhone %>% filter(age %in% 24:35), "Ages 24-35")
+plot_4_iPhone_stroop
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(iPhone, 36:50)
+plot_5_iPhone_stroop <- stroop_plot(iPhone %>% filter(age %in% 36:50), "Ages 36-50")
+plot_5_iPhone_stroop
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(iPhone, 51:65)
+plot_6_iPhone_stroop <- stroop_plot(iPhone %>% filter(age %in% 51:65), "Ages 51-65")
+plot_6_iPhone_stroop
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(iPhone, 66:120)
+plot_7_iPhone_stroop <- stroop_plot(iPhone %>% filter(age %in% 66:120), "Ages 66-75")
+plot_7_iPhone_stroop
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(iPhone, 76:85)
+plot_8_iPhone_stroop <- stroop_plot(iPhone %>% filter(age %in% 76:85), "Ages 76-85")
+plot_8_iPhone_stroop
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(iPhone, 86:120)
+plot_9_iPhone_stroop <- stroop_plot(iPhone %>% filter(age %in% 86:120), "Ages 86-120")
+plot_9_iPhone_stroop
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(iPhone, 10:13)
+plot_1_iPhone_immediate_recall <- immediate_recall_plot(iPhone %>% filter(age %in% 10:13), "Ages 10-13")
+plot_1_iPhone_immediate_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(iPhone, 14:18)
+plot_2_iPhone_immediate_recall <- immediate_recall_plot(iPhone %>% filter(age %in% 14:18), "Ages 14-18")
+plot_2_iPhone_immediate_recall
+```  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(iPhone, 19:35)
+plot_3_iPhone_immediate_recall <- immediate_recall_plot(iPhone %>% filter(age %in% 19:35), "Ages 19-24")
+plot_3_iPhone_immediate_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(iPhone, 24:35)
+plot_4_iPhone_immediate_recall <- immediate_recall_plot(iPhone %>% filter(age %in% 24:35), "Ages 24-35")
+plot_4_iPhone_immediate_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(iPhone, 36:50)
+plot_5_iPhone_immediate_recall <- immediate_recall_plot(iPhone %>% filter(age %in% 36:50), "Ages 36-50")
+plot_5_iPhone_immediate_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(iPhone, 51:65)
+plot_6_iPhone_immediate_recall <- immediate_recall_plot(iPhone %>% filter(age %in% 51:65), "Ages 51-65")
+plot_6_iPhone_immediate_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(iPhone, 66:120)
+plot_7_iPhone_immediate_recall <- immediate_recall_plot(iPhone %>% filter(age %in% 66:120), "Ages 66-75")
+plot_7_iPhone_immediate_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(iPhone, 76:85)
+plot_8_iPhone_immediate_recall <- immediate_recall_plot(iPhone %>% filter(age %in% 76:85), "Ages 76-85")
+plot_8_iPhone_immediate_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(iPhone, 86:120)
+plot_9_iPhone_immediate_recall <- immediate_recall_plot(iPhone %>% filter(age %in% 86:120), "Ages 86-120")
+plot_9_iPhone_immediate_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(iPhone, 10:13)
+plot_1_iPhone_flanker <- flanker_plot(iPhone %>% filter(age %in% 10:13), "Ages 10-13")
+plot_1_iPhone_flanker
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(iPhone, 14:18)
+plot_2_iPhone_flanker <- flanker_plot(iPhone %>% filter(age %in% 14:18), "Ages 14-18")
+plot_2_iPhone_flanker
+```  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(iPhone, 19:35)
+plot_3_iPhone_flanker <- flanker_plot(iPhone %>% filter(age %in% 19:35), "Ages 19-24")
+plot_3_iPhone_flanker
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(iPhone, 24:35)
+plot_4_iPhone_flanker <- flanker_plot(iPhone %>% filter(age %in% 24:35), "Ages 24-35")
+plot_4_iPhone_flanker
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(iPhone, 36:50)
+plot_5_iPhone_flanker <- flanker_plot(iPhone %>% filter(age %in% 36:50), "Ages 36-50")
+plot_5_iPhone_flanker
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(iPhone, 51:65)
+plot_6_iPhone_flanker <- flanker_plot(iPhone %>% filter(age %in% 51:65), "Ages 51-65")
+plot_6_iPhone_flanker
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(iPhone, 66:120)
+plot_7_iPhone_flanker <- flanker_plot(iPhone %>% filter(age %in% 66:120), "Ages 66-75")
+plot_7_iPhone_flanker
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(iPhone, 76:85)
+plot_8_iPhone_flanker<- flanker_plot(iPhone %>% filter(age %in% 76:85), "Ages 76-85")
+plot_8_iPhone_flanker
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(iPhone, 86:120)
+plot_9_iPhone_flanker <- flanker_plot(iPhone %>% filter(age %in% 86:120), "Ages 86-120")
+plot_9_iPhone_flanker
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(iPhone, 10:13)
+plot_1_iPhone_digit_symbol <- digit_symbol_plot(iPhone %>% filter(age %in% 10:13), "Ages 10-13")
+plot_1_iPhone_digit_symbol
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(iPhone, 14:18)
+plot_2_iPhone_digit_symbol <- digit_symbol_plot(iPhone %>% filter(age %in% 14:18), "Ages 14-18")
+plot_2_iPhone_digit_symbol
+```  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(iPhone, 19:35)
+plot_3_iPhone_digit_symbol <- digit_symbol_plot(iPhone %>% filter(age %in% 19:35), "Ages 19-24")
+plot_3_iPhone_digit_symbol
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(iPhone, 24:35)
+plot_4_iPhone_digit_symbol <- digit_symbol_plot(iPhone %>% filter(age %in% 24:35), "Ages 24-35")
+plot_4_iPhone_digit_symbol
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(iPhone, 36:50)
+plot_5_iPhone_digit_symbol <- digit_symbol_plot(iPhone %>% filter(age %in% 36:50), "Ages 36-50")
+plot_5_iPhone_digit_symbol
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(iPhone, 51:65)
+plot_6_iPhone_digit_symbol <- digit_symbol_plot(iPhone %>% filter(age %in% 51:65), "Ages 51-65")
+plot_6_iPhone_digit_symbol
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(iPhone, 66:120)
+plot_7_iPhone_digit_symbol <- digit_symbol_plot(iPhone %>% filter(age %in% 66:120), "Ages 66-75")
+plot_7_iPhone_digit_symbol
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(iPhone, 76:85)
+plot_8_iPhone_digit_symbol <- digit_symbol_plot(iPhone %>% filter(age %in% 76:85), "Ages 76-85")
+plot_8_iPhone_digit_symbol
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(iPhone, 86:120)
+plot_9_iPhone_digit_symbol <- digit_symbol_plot(iPhone %>% filter(age %in% 86:120), "Ages 86-120")
+plot_9_iPhone_digit_symbol
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(iPhone, 10:13)
+plot_1_iPhone_delayed_recall <- delayed_recall_plot(iPhone %>% filter(age %in% 10:13), "Ages 10-13")
+plot_1_iPhone_delayed_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(iPhone, 14:18)
+plot_2_iPhone_delayed_recall <- delayed_recall_plot(iPhone %>% filter(age %in% 14:18), "Ages 14-18")
+plot_2_iPhone_delayed_recall
+```  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(iPhone, 19:35)
+plot_3_iPhone_delayed_recall <- delayed_recall_plot(iPhone %>% filter(age %in% 19:35), "Ages 19-24")
+plot_3_iPhone_delayed_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(iPhone, 24:35)
+plot_4_iPhone_delayed_recall <- delayed_recall_plot(iPhone %>% filter(age %in% 24:35), "Ages 24-35")
+plot_4_iPhone_delayed_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(iPhone, 36:50)
+plot_5_iPhone_delayed_recall <- delayed_recall_plot(iPhone %>% filter(age %in% 36:50), "Ages 36-50")
+plot_5_iPhone_delayed_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(iPhone, 51:65)
+plot_6_iPhone_delayed_recall <- delayed_recall_plot(iPhone %>% filter(age %in% 51:65), "Ages 51-65")
+plot_6_iPhone_delayed_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(iPhone, 66:120)
+plot_7_iPhone_delayed_recall <- delayed_recall_plot(iPhone %>% filter(age %in% 66:120), "Ages 66-75")
+plot_7_iPhone_delayed_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(iPhone, 76:85)
+plot_8_iPhone_delayed_recall <- delayed_recall_plot(iPhone %>% filter(age %in% 76:85), "Ages 76-85")
+plot_8_iPhone_delayed_recall
+```
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(iPhone, 86:120)
+plot_9_iPhone_delayed_recall <- delayed_recall_plot(iPhone %>% filter(age %in% 86:120), "Ages 86-120")
+plot_9_iPhone_delayed_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(iPhone, 10:13)
+plot_1_iPhone_balance <- balance_plot(iPhone %>% filter(age %in% 10:13), "Ages 10-13")
+plot_1_iPhone_balance
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(iPhone, 14:18)
+plot_2_iPhone_balance <- balance_plot(iPhone %>% filter(age %in% 14:18), "Ages 14-18")
+plot_2_iPhone_balance
+```  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(iPhone, 19:35)
+plot_3_iPhone_balance <- balance_plot(iPhone %>% filter(age %in% 19:35), "Ages 19-24")
+plot_3_iPhone_balance
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(iPhone, 24:35)
+plot_4_iPhone_balance <- balance_plot(iPhone %>% filter(age %in% 24:35), "Ages 24-35")
+plot_4_iPhone_balance
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(iPhone, 36:50)
+plot_5_iPhone_balance <- balance_plot(iPhone %>% filter(age %in% 36:50), "Ages 36-50")
+plot_5_iPhone_balance
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(iPhone, 51:65)
+plot_6_iPhone_balance <- balance_plot(iPhone %>% filter(age %in% 51:65), "Ages 51-65")
+plot_6_iPhone_balance
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(iPhone, 66:120)
+plot_7_iPhone_balance <- balance_plot(iPhone %>% filter(age %in% 66:120), "Ages 66-75")
+plot_7_iPhone_balance
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(iPhone, 76:85)
+plot_8_iPhone_balance <- balance_plot(iPhone %>% filter(age %in% 76:85), "Ages 76-85")
+plot_8_iPhone_balance
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(iPhone, 86:120)
+plot_9_iPhone_balance <- balance_plot(iPhone %>% filter(age %in% 86:120), "Ages 86-120")
+plot_9_iPhone_balance
+```
+
+##iPad
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(iPad, 10:13)
+plot_1_iPad_trails <- trails_plot(iPad %>% filter(age %in% 10:13), "Ages 10-13")
+plot_1_iPad_trails
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(iPad, 14:18)
+plot_2_iPad_trails <- trails_plot(iPad %>% filter(age %in% 14:18), "Ages 14-18")
+plot_2_iPad_trails
+```  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(iPad, 19:35)
+plot_3_iPad_trails <- trails_plot(iPad %>% filter(age %in% 19:35), "Ages 19-24")
+plot_3_iPad_trails
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(iPad, 24:35)
+plot_4_iPad_trails <- trails_plot(iPad %>% filter(age %in% 24:35), "Ages 24-35")
+plot_4_iPad_trails
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(iPad, 36:50)
+plot_5_iPad_trails <- trails_plot(iPad %>% filter(age %in% 36:50), "Ages 36-50")
+plot_5_iPad_trails
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(iPad, 51:65)
+plot_6_iPad_trails <- trails_plot(iPad %>% filter(age %in% 51:65), "Ages 51-65")
+plot_6_iPad_trails
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(iPad, 66:120)
+plot_7_iPad_trails <- trails_plot(iPad %>% filter(age %in% 66:120), "Ages 66-75")
+plot_7_iPad_trails
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(iPad, 76:85)
+plot_8_iPad_trails <- trails_plot(iPad %>% filter(age %in% 76:85), "Ages 76-85")
+plot_8_iPad_trails
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(iPad, 86:120)
+plot_9_iPad_trails <- trails_plot(iPad %>% filter(age %in% 86:120), "Ages 86-120")
+plot_9_iPad_trails
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(iPad, 10:13)
+plot_1_iPad_stroop <- stroop_plot(iPad %>% filter(age %in% 10:13), "Ages 10-13")
+plot_1_iPad_stroop
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(iPad, 14:18)
+plot_2_iPad_stroop <- stroop_plot(iPad %>% filter(age %in% 14:18), "Ages 14-18")
+plot_2_iPad_stroop
+```  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(iPad, 19:35)
+plot_3_iPad_stroop <- stroop_plot(iPad %>% filter(age %in% 19:35), "Ages 19-24")
+plot_3_iPad_stroop
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(iPad, 24:35)
+plot_4_iPad_stroop <- stroop_plot(iPad %>% filter(age %in% 24:35), "Ages 24-35")
+plot_4_iPad_stroop
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(iPad, 36:50)
+plot_5_iPad_stroop <- stroop_plot(iPad %>% filter(age %in% 36:50), "Ages 36-50")
+plot_5_iPad_stroop
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(iPad, 51:65)
+plot_6_iPad_stroop <- stroop_plot(iPad %>% filter(age %in% 51:65), "Ages 51-65")
+plot_6_iPad_stroop
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(iPad, 66:120)
+plot_7_iPad_stroop <- stroop_plot(iPad %>% filter(age %in% 66:120), "Ages 66-75")
+plot_7_iPad_stroop
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(iPad, 76:85)
+plot_8_iPad_stroop <- stroop_plot(iPad %>% filter(age %in% 76:85), "Ages 76-85")
+plot_8_iPad_stroop
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(iPad, 86:120)
+plot_9_iPad_stroop <- stroop_plot(iPad %>% filter(age %in% 86:120), "Ages 86-120")
+plot_9_iPad_stroop
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(iPad, 10:13)
+plot_1_iPad_immediate_recall <- immediate_recall_plot(iPad %>% filter(age %in% 10:13), "Ages 10-13")
+plot_1_iPad_immediate_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(iPad, 14:18)
+plot_2_iPad_immediate_recall <- immediate_recall_plot(iPad %>% filter(age %in% 14:18), "Ages 14-18")
+plot_2_iPad_immediate_recall
+```  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(iPad, 19:35)
+plot_3_iPad_immediate_recall <- immediate_recall_plot(iPad %>% filter(age %in% 19:35), "Ages 19-24")
+plot_3_iPad_immediate_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(iPad, 24:35)
+plot_4_iPad_immediate_recall <- immediate_recall_plot(iPad %>% filter(age %in% 24:35), "Ages 24-35")
+plot_4_iPad_immediate_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(iPad, 36:50)
+plot_5_iPad_immediate_recall <- immediate_recall_plot(iPad %>% filter(age %in% 36:50), "Ages 36-50")
+plot_5_iPad_immediate_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(iPad, 51:65)
+plot_6_iPad_immediate_recall <- immediate_recall_plot(iPad %>% filter(age %in% 51:65), "Ages 51-65")
+plot_6_iPad_immediate_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(iPad, 66:120)
+plot_7_iPad_immediate_recall <- immediate_recall_plot(iPad %>% filter(age %in% 66:120), "Ages 66-75")
+plot_7_iPad_immediate_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(iPad, 76:85)
+plot_8_iPad_immediate_recall <- immediate_recall_plot(iPad %>% filter(age %in% 76:85), "Ages 76-85")
+plot_8_iPad_immediate_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(iPad, 86:120)
+plot_9_iPad_immediate_recall <- immediate_recall_plot(iPad %>% filter(age %in% 86:120), "Ages 86-120")
+plot_9_iPad_immediate_recall
+```
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(iPad, 10:13)
+plot_1_iPad_flanker <- flanker_plot(iPad %>% filter(age %in% 10:13), "Ages 10-13")
+plot_1_iPad_flanker
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(iPad, 14:18)
+plot_2_iPad_flanker <- flanker_plot(iPad %>% filter(age %in% 14:18), "Ages 14-18")
+plot_2_iPad_flanker
+```  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(iPad, 19:35)
+plot_3_iPad_flanker <- flanker_plot(iPad %>% filter(age %in% 19:35), "Ages 19-24")
+plot_3_iPad_flanker
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(iPad, 24:35)
+plot_4_iPad_flanker <- flanker_plot(iPad %>% filter(age %in% 24:35), "Ages 24-35")
+plot_4_iPad_flanker
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(iPad, 36:50)
+plot_5_iPad_flanker <- flanker_plot(iPad %>% filter(age %in% 36:50), "Ages 36-50")
+plot_5_iPad_flanker
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(iPad, 51:65)
+plot_6_iPad_flanker <- flanker_plot(iPad %>% filter(age %in% 51:65), "Ages 51-65")
+plot_6_iPad_flanker
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(iPad, 66:120)
+plot_7_iPad_flanker <- flanker_plot(iPad %>% filter(age %in% 66:120), "Ages 66-75")
+plot_7_iPad_flanker
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(iPad, 76:85)
+plot_8_iPad_flanker <- flanker_plot(iPad %>% filter(age %in% 76:85), "Ages 76-85")
+plot_8_iPad_flanker
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(iPad, 86:120)
+plot_9_iPad_flanker <- flanker_plot(iPad %>% filter(age %in% 86:120), "Ages 86-120")
+plot_9_iPad_flanker
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(iPad, 10:13)
+plot_1_iPad_digit_symbol <- digit_symbol_plot(iPad %>% filter(age %in% 10:13), "Ages 10-13")
+plot_1_iPad_digit_symbol
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(iPad, 14:18)
+plot_2_iPad_digit_symbol <- digit_symbol_plot(iPad %>% filter(age %in% 14:18), "Ages 14-18")
+plot_2_iPad_digit_symbol
+```  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(iPad, 19:35)
+plot_3_iPad_digit_symbol <- digit_symbol_plot(iPad %>% filter(age %in% 19:35), "Ages 19-24")
+plot_3_iPad_digit_symbol
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(iPad, 24:35)
+plot_4_iPad_digit_symbol <- digit_symbol_plot(iPad %>% filter(age %in% 24:35), "Ages 24-35")
+plot_4_iPad_digit_symbol
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(iPad, 36:50)
+plot_5_iPad_digit_symbol <- digit_symbol_plot(iPad %>% filter(age %in% 36:50), "Ages 36-50")
+plot_5_iPad_digit_symbol
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(iPad, 51:65)
+plot_6_iPad_digit_symbol <- digit_symbol_plot(iPad %>% filter(age %in% 51:65), "Ages 51-65")
+plot_6_iPad_digit_symbol
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(iPad, 66:120)
+plot_7_iPad_digit_symbol <- digit_symbol_plot(iPad %>% filter(age %in% 66:120), "Ages 66-75")
+plot_7_iPad_digit_symbol
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(iPad, 76:85)
+plot_8_iPad_digit_symbol <- digit_symbol_plot(iPad %>% filter(age %in% 76:85), "Ages 76-85")
+plot_8_iPad_digit_symbol
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(iPad, 86:120)
+plot_9_iPad_digit_symbol <- digit_symbol_plot(iPad %>% filter(age %in% 86:120), "Ages 86-120")
+plot_9_iPad_digit_symbol
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(iPad, 10:13)
+plot_1_iPad_delayed_recall <- delayed_recall_plot(iPad %>% filter(age %in% 10:13), "Ages 10-13")
+plot_1_iPad_delayed_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(iPad, 14:18)
+plot_2_iPad_delayed_recall <- delayed_recall_plot(iPad %>% filter(age %in% 14:18), "Ages 14-18")
+plot_2_iPad_delayed_recall
+```  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(iPad, 19:35)
+plot_3_iPad_delayed_recall <- delayed_recall_plot(iPad %>% filter(age %in% 19:35), "Ages 19-24")
+plot_3_iPad_delayed_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(iPad, 24:35)
+plot_4_iPad_delayed_recall <- delayed_recall_plot(iPad %>% filter(age %in% 24:35), "Ages 24-35")
+plot_4_iPad_delayed_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(iPad, 36:50)
+plot_5_iPad_delayed_recall <- delayed_recall_plot(iPad %>% filter(age %in% 36:50), "Ages 36-50")
+plot_5_iPad_delayed_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(iPad, 51:65)
+plot_6_iPad_delayed_recall <- delayed_recall_plot(iPad %>% filter(age %in% 51:65), "Ages 51-65")
+plot_6_iPad_delayed_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(iPad, 66:120)
+plot_7_iPad_delayed_recall <- delayed_recall_plot(iPad %>% filter(age %in% 66:120), "Ages 66-75")
+plot_7_iPad_delayed_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(iPad, 76:85)
+plot_8_iPad_delayed_recall <- delayed_recall_plot(iPad %>% filter(age %in% 76:85), "Ages 76-85")
+plot_8_iPad_delayed_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(iPad, 86:120)
+plot_9_iPad_delayed_recall <- delayed_recall_plot(iPad %>% filter(age %in% 86:120), "Ages 86-120")
+plot_9_iPad_delayed_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(iPad, 10:13)
+plot_1_iPad_balance <- balance_plot(iPad %>% filter(age %in% 10:13), "Ages 10-13")
+plot_1_iPad_balance
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(iPad, 14:18)
+plot_2_iPad_balance <- balance_plot(iPad %>% filter(age %in% 14:18), "Ages 14-18")
+plot_2_iPad_balance
+```  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(iPad, 19:35)
+plot_3_iPad_balance <- balance_plot(iPad %>% filter(age %in% 19:35), "Ages 19-24")
+plot_3_iPad_balance
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(iPad, 24:35)
+plot_4_iPad_balance <- balance_plot(iPad %>% filter(age %in% 24:35), "Ages 24-35")
+plot_4_iPad_balance
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(iPad, 36:50)
+plot_5_iPad_balance <- balance_plot(iPad %>% filter(age %in% 36:50), "Ages 36-50")
+plot_5_iPad_balance
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(iPad, 51:65)
+plot_6_iPad_balance <- balance_plot(iPad %>% filter(age %in% 51:65), "Ages 51-65")
+plot_6_iPad_balance
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(iPad, 66:120)
+plot_7_iPad_balance <- balance_plot(iPad %>% filter(age %in% 66:120), "Ages 66-75")
+plot_7_iPad_balance
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(iPad, 76:85)
+plot_8_iPad_balance <- balance_plot(iPad %>% filter(age %in% 76:85), "Ages 76-85")
+plot_8_iPad_balance
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(iPad, 86:120)
+plot_9_iPad_balance <- balance_plot(iPad %>% filter(age %in% 86:120), "Ages 86-120")
+plot_9_iPad_balance
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+browser <- concussion_memory_combined %>% filter(device_model == "browser")
+```
+
+##Browser
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(browser, 10:13)
+plot_1_browser_trails <- trails_plot(browser %>% filter(age %in% 10:13), "Ages 10-13")
+plot_1_browser_trails
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(browser, 14:18)
+plot_2_browser_trails <- trails_plot(browser %>% filter(age %in% 14:18), "Ages 14-18")
+plot_2_browser_trails
+```  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(browser, 19:35)
+plot_3_browser_trails <- trails_plot(browser %>% filter(age %in% 19:35), "Ages 19-24")
+plot_3_browser_trails
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(browser, 24:35)
+plot_4_browser_trails <- trails_plot(browser %>% filter(age %in% 24:35), "Ages 24-35")
+plot_4_browser_trails
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(browser, 36:50)
+plot_5_browser_trails <- trails_plot(browser %>% filter(age %in% 36:50), "Ages 36-50")
+plot_5_browser_trails
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(browser, 51:65)
+plot_6_browser_trails <- trails_plot(browser %>% filter(age %in% 51:65), "Ages 51-65")
+plot_6_browser_trails
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(browser, 66:120)
+plot_7_browser_trails <- trails_plot(browser %>% filter(age %in% 66:120), "Ages 66-75")
+plot_7_browser_trails
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(browser, 76:85)
+plot_8_browser_trails <- trails_plot(browser %>% filter(age %in% 76:85), "Ages 76-85")
+plot_8_browser_trails
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+trails_device_age_bucket(browser, 86:120)
+plot_9_browser_trails <- trails_plot(browser %>% filter(age %in% 86:120), "Ages 86-120")
+plot_9_browser_trails
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(browser, 10:13)
+plot_1_browser_stroop <- stroop_plot(browser %>% filter(age %in% 10:13), "Ages 10-13")
+plot_1_browser_stroop
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(browser, 14:18)
+plot_2_browser_stroop <- stroop_plot(browser %>% filter(age %in% 14:18), "Ages 14-18")
+plot_2_browser_stroop
+```  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(browser, 19:35)
+plot_3_browser_stroop <- stroop_plot(browser %>% filter(age %in% 19:35), "Ages 19-24")
+plot_3_browser_stroop
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(browser, 24:35)
+plot_4_browser_stroop <- stroop_plot(browser %>% filter(age %in% 24:35), "Ages 24-35")
+plot_4_browser_stroop
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(browser, 36:50)
+plot_5_browser_stroop <- stroop_plot(browser %>% filter(age %in% 36:50), "Ages 36-50")
+plot_5_browser_stroop
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(browser, 51:65)
+plot_6_browser_stroop <- stroop_plot(browser %>% filter(age %in% 51:65), "Ages 51-65")
+plot_6_browser_stroop
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(browser, 66:120)
+plot_7_browser_stroop <- stroop_plot(browser %>% filter(age %in% 66:120), "Ages 66-75")
+plot_7_browser_stroop
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(browser, 76:85)
+plot_8_browser_stroop <- stroop_plot(browser %>% filter(age %in% 76:85), "Ages 76-85")
+plot_8_browser_stroop
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+stroop_device_age_bucket(browser, 86:120)
+plot_9_browser_stroop <- stroop_plot(browser %>% filter(age %in% 86:120), "Ages 86-120")
+plot_9_browser_stroop
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(browser, 10:13)
+plot_1_browser_immediate_recall <- immediate_recall_plot(browser %>% filter(age %in% 10:13), "Ages 10-13")
+plot_1_browser_immediate_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(browser, 14:18)
+plot_2_browser_immediate_recall <- immediate_recall_plot(browser %>% filter(age %in% 14:18), "Ages 14-18")
+plot_2_browser_immediate_recall
+```  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(browser, 19:35)
+plot_3_browser_immediate_recall <- immediate_recall_plot(browser %>% filter(age %in% 19:35), "Ages 19-24")
+plot_3_browser_immediate_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(browser, 24:35)
+plot_4_browser_immediate_recall <- immediate_recall_plot(browser %>% filter(age %in% 24:35), "Ages 24-35")
+plot_4_browser_immediate_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(browser, 36:50)
+plot_5_browser_immediate_recall <- immediate_recall_plot(browser %>% filter(age %in% 36:50), "Ages 36-50")
+plot_5_browser_immediate_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(browser, 51:65)
+plot_6_browser_immediate_recall <- immediate_recall_plot(browser %>% filter(age %in% 51:65), "Ages 51-65")
+plot_6_browser_immediate_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(browser, 66:120)
+plot_7_browser_immediate_recall <- immediate_recall_plot(browser %>% filter(age %in% 66:120), "Ages 66-75")
+plot_7_browser_immediate_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(browser, 76:85)
+plot_8_browser_immediate_recall <- immediate_recall_plot(browser %>% filter(age %in% 76:85), "Ages 76-85")
+plot_8_browser_immediate_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+immediate_recall_age_bucket(browser, 86:120)
+plot_9_browser_immediate_recall <- immediate_recall_plot(browser %>% filter(age %in% 86:120), "Ages 86-120")
+plot_9_browser_immediate_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(browser, 10:13)
+plot_1_browser_flanker <- flanker_plot(browser %>% filter(age %in% 10:13), "Ages 10-13")
+plot_1_browser_flanker
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(browser, 14:18)
+plot_2_browser_flanker <- flanker_plot(browser %>% filter(age %in% 14:18), "Ages 14-18")
+plot_2_browser_flanker
+```  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(browser, 19:35)
+plot_3_browser_flanker <- flanker_plot(browser %>% filter(age %in% 19:35), "Ages 19-24")
+plot_3_browser_flanker
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(browser, 24:35)
+plot_4_browser_flanker <- flanker_plot(browser %>% filter(age %in% 24:35), "Ages 24-35")
+plot_4_browser_flanker
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(browser, 36:50)
+plot_5_browser_flanker <- flanker_plot(browser %>% filter(age %in% 36:50), "Ages 36-50")
+plot_5_browser_flanker
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(browser, 51:65)
+plot_6_browser_flanker <- flanker_plot(browser %>% filter(age %in% 51:65), "Ages 51-65")
+plot_6_browser_flanker
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(browser, 66:120)
+plot_7_browser_flanker <- flanker_plot(browser %>% filter(age %in% 66:120), "Ages 66-75")
+plot_7_browser_flanker
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(browser, 76:85)
+plot_8_browser_flanker <- flanker_plot(browser %>% filter(age %in% 76:85), "Ages 76-85")
+plot_8_browser_flanker
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+flanker_device_age_bucket(browser, 86:120)
+plot_9_browser_flanker <- flanker_plot(browser %>% filter(age %in% 86:120), "Ages 86-120")
+plot_9_browser_flanker
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(browser, 10:13)
+plot_1_browser_digit_symbol <- digit_symbol_plot(browser %>% filter(age %in% 10:13), "Ages 10-13")
+plot_1_browser_digit_symbol
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(browser, 14:18)
+plot_2_browser_digit_symbol <- digit_symbol_plot(browser %>% filter(age %in% 14:18), "Ages 14-18")
+plot_2_browser_digit_symbol
+```  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(browser, 19:35)
+plot_3_browser_digit_symbol <- digit_symbol_plot(browser %>% filter(age %in% 19:35), "Ages 19-24")
+plot_3_browser_digit_symbol
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(browser, 24:35)
+plot_4_browser_digit_symbol <- digit_symbol_plot(browser %>% filter(age %in% 24:35), "Ages 24-35")
+plot_4_browser_digit_symbol
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(browser, 36:50)
+plot_5_browser_digit_symbol <- digit_symbol_plot(browser %>% filter(age %in% 36:50), "Ages 36-50")
+plot_5_browser_digit_symbol
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(browser, 51:65)
+plot_6_browser_digit_symbol <- digit_symbol_plot(browser %>% filter(age %in% 51:65), "Ages 51-65")
+plot_6_browser_digit_symbol
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(browser, 66:120)
+plot_7_browser_digit_symbol <- digit_symbol_plot(browser %>% filter(age %in% 66:120), "Ages 66-75")
+plot_7_browser_digit_symbol
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(browser, 76:85)
+plot_8_browser_digit_symbol <- digit_symbol_plot(browser %>% filter(age %in% 76:85), "Ages 76-85")
+plot_8_browser_digit_symbol
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+digit_symbol_age_bucket(browser, 86:120)
+plot_9_browser_digit_symbol <- digit_symbol_plot(browser %>% filter(age %in% 86:120), "Ages 86-120")
+plot_9_browser_digit_symbol
+```
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(browser, 10:13)
+plot_1_browser_delayed_recall <- delayed_recall_plot(browser %>% filter(age %in% 10:13), "Ages 10-13")
+plot_1_browser_delayed_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(browser, 14:18)
+plot_2_browser_delayed_recall <- delayed_recall_plot(browser %>% filter(age %in% 14:18), "Ages 14-18")
+plot_2_browser_delayed_recall
+```  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(browser, 19:35)
+plot_3_browser_delayed_recall <- delayed_recall_plot(browser %>% filter(age %in% 19:35), "Ages 19-24")
+plot_3_browser_delayed_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(browser, 24:35)
+plot_4_browser_delayed_recall <- delayed_recall_plot(browser %>% filter(age %in% 24:35), "Ages 24-35")
+plot_4_browser_delayed_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(browser, 36:50)
+plot_5_browser_delayed_recall <- delayed_recall_plot(browser %>% filter(age %in% 36:50), "Ages 36-50")
+plot_5_browser_delayed_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(browser, 51:65)
+plot_6_browser_delayed_recall <- delayed_recall_plot(browser %>% filter(age %in% 51:65), "Ages 51-65")
+plot_6_browser_delayed_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(browser, 66:120)
+plot_7_browser_delayed_recall <- delayed_recall_plot(browser %>% filter(age %in% 66:120), "Ages 66-75")
+plot_7_browser_delayed_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(browser, 76:85)
+plot_8_browser_delayed_recall <- delayed_recall_plot(browser %>% filter(age %in% 76:85), "Ages 76-85")
+plot_8_browser_delayed_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+delayed_recall_device_age_bucket(browser, 86:120)
+plot_9_browser_delayed_recall <- delayed_recall_plot(browser %>% filter(age %in% 86:120), "Ages 86-120")
+plot_9_browser_delayed_recall
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(browser, 10:13)
+plot_1_browser_balance <- balance_plot(browser %>% filter(age %in% 10:13), "Ages 10-13")
+plot_1_browser_balance
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(browser, 14:18)
+plot_2_browser_balance <- balance_plot(browser %>% filter(age %in% 14:18), "Ages 14-18")
+plot_2_browser_balance
+```  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(browser, 19:35)
+plot_3_browser_balance <- balance_plot(browser %>% filter(age %in% 19:35), "Ages 19-24")
+plot_3_browser_balance
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(browser, 24:35)
+plot_4_browser_balance <- balance_plot(browser %>% filter(age %in% 24:35), "Ages 24-35")
+plot_4_browser_balance
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(browser, 36:50)
+plot_5_browser_balance <- balance_plot(browser %>% filter(age %in% 36:50), "Ages 36-50")
+plot_5_browser_balance
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(browser, 51:65)
+plot_6_browser_balance <- balance_plot(browser %>% filter(age %in% 51:65), "Ages 51-65")
+plot_6_browser_balance
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(browser, 66:120)
+plot_7_browser_balance <- balance_plot(browser %>% filter(age %in% 66:120), "Ages 66-75")
+plot_7_browser_balance
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(browser, 76:85)
+plot_8_browser_balance <- balance_plot(browser %>% filter(age %in% 76:85), "Ages 76-85")
+plot_8_browser_balance
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+balance_device_age_bucket(browser, 86:120)
+plot_9_browser_balance <- balance_plot(browser %>% filter(age %in% 86:120), "Ages 86-120")
+plot_9_browser_balance
+```

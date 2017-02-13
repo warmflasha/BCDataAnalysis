@@ -1,0 +1,176 @@
+---
+title: "Prelim Matrix Analyses"
+author: "Niha Pereira"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+*user_id 89, batt 55 has 'NA' for matrix even though it shows that they took it
+-parsing the matrix test to figure out which trial type & variable suck
+
+```{r}
+
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(lubridate)
+library(tidyr)
+library(stringr)
+library(pipefittr)
+library(janitor)
+
+###Load excel files
+load_matrix <- function(mypath="/Users/Niha/Desktop/Braincheck/Data/matrix_trials_2017-01-24_18h30m58.csv"){
+  mydf <- read.csv(mypath, stringsAsFactors = FALSE)
+  return(mydf)
+}
+load_assessments <-function(mypath="/Users/Niha/Desktop/Braincheck/Data/assessments_2017-01-24_18h30m58.csv"){
+  mydf <- read.csv(mypath, stringsAsFactors = FALSE)
+  return(mydf)
+}
+load_batteries <- function(mypath = "/Users/Niha/Desktop/Braincheck/Data/batteries_2017-01-24_18h30m58.csv"){
+  mydf <- read.csv(mypath, stringsAsFactors = FALSE)
+  return(mydf)
+}
+load_users <- function(mypath = "/Users/Niha/Desktop/Braincheck/Data/users_2017-01-24_18h30m57.csv") {
+  mydf <- read.csv(mypath, stringsAsFactors = FALSE)
+  return(mydf)
+}
+
+###converts 't/f' scores to '1/0'
+convert_to_bin <- function(answers){
+  if (answers == 't'){
+    answers <- 1
+  }
+  else if (answers == 'f') {
+    answers <- 0
+  }
+}
+
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+
+filter_batteries <- function(assessments, batteries) {
+  batteries <- assessments %>% filter(assessment_type_id == 8, battery_id %in% batteries) %>%   select(-(assessment_type_id))
+  return(batteries)
+}
+
+establish_identifiers <- function(user_type, users, matrix) {
+  identifiers <- batteries %>% right_join(user_type) %>% right_join(users)
+   matrix <- matrix %>% right_join(identifiers) %>% 
+                  arrange(id) %>% 
+                  select(trial_number, correct, user_id, age, battery_id ) %>%
+                  drop_na()
+
+  return(matrix)
+}
+
+calculate_scores <- function(matrix) {
+  matrix$correct <- lapply(matrix$correct, convert_to_bin)
+  matrix <- matrix %>% spread(trial_number, correct)
+  colnames(matrix)[4:21] <- c("Trial_1", "Trial_2", "Trial_3",
+                            "Trial_4", "Trial_5", "Trial_6",
+                            "Trial_7", "Trial_8", "Trial_9",
+                            "Trial_10", "Trial_11", "Trial_12",
+                            "Trial_13", "Trial_14", "Trial_15",
+                            "Trial_16", "Trial_17", "Trial_18" ) 
+  matrix[4:21] <- unlist(matrix[4:21])
+
+  matrix <- matrix %>% mutate(basic_num_correct = (Trial_1 ) + (Trial_2 ) + (Trial_3 ) +
+                               (Trial_4) + (Trial_5 ) + (Trial_6 ), 
+                            reasoning_num_correct = (Trial_7 ) + (Trial_8 )  + (Trial_9 ) +
+                               (Trial_10) + (Trial_11 )+ (Trial_12 ),
+                           advanced_num_correct = (Trial_13 ) + (Trial_14 ) + (Trial_15 ) +
+                               (Trial_16)  + (Trial_17 )  + (Trial_17 ))
+                            
+matrix <- matrix %>% 
+          mutate( basic_score = basic_num_correct/ 6.0, reasoning_score = reasoning_num_correct / 6.0, advanced_score = advanced_num_correct/6.0)   
+matrix <- (matrix %>% select(user_id,age, basic_score, reasoning_score, advanced_score))
+
+return(matrix)  
+}
+
+
+valid_batteries <- c(29, 46 ,61 ,23 ,13 ,28 ,45 ,50 ,51 ,52 ,59 ,65 ,73 ,71 ,84 ,88 ,22 ,27 ,35, 40,54, 26,30, 42, 44, 12, 18, 43, 64, 78, 21, 169,155, 165,156 ,137, 160, 139, 150, 158, 173, 162, 163, 172, 164, 170, 168, 138, 148, 147, 146, 153, 143, 159, 171, 141, 142, 145, 157, 149, 140, 167, 195,199,196,187,182, 189, 193)
+
+invalid_batteries <- c(127,125, 185, 197, 198, 134, 190, 132, 181, 135, 136, 186, 133, 128, 191, 188, 194, 183, 184, 192, 195, 67, 36, 72, 34, 53, 48, 56, 55, 70, 39, 57, 80, 123, 31, 38, 32, 60, 17, 77)
+
+matrix <- load_matrix() %>% clean_names()
+assessments <- load_assessments() %>% clean_names() %>% 
+                select(id, assessment_type_id, battery_id, -(incomplete)) %>%
+                rename(assessment_id = id)
+
+healthy_users <- filter_batteries(assessments, valid_batteries)
+impaired_users <- filter_batteries(assessments, invalid_batteries)
+
+batteries <- load_batteries() %>% clean_names() %>% 
+              select(id, user_id) %>% 
+              rename(battery_id = id)
+
+current_time <- now()
+users <- load_users() %>% clean_names() %>%
+          select(id, date_of_birth) %>%
+          rename(user_id = id)
+users$age <- year(as.period(interval(ymd(users$date_of_birth), current_time)))
+users <- users %>% select(user_id, age)
+
+healthy_matrix_users <- establish_identifiers(healthy_users, users, matrix)
+impaired_matrix_users <- establish_identifiers(impaired_users, users, matrix)
+
+healthy_scores <- calculate_scores(healthy_matrix_users)
+impaired_scores <- calculate_scores(impaired_matrix_users)
+View(healthy_scores)
+View(impaired_scores)
+
+
+```
+##HEALTHY
+```{r}
+basic <-(healthy_scores %>% select(user_id, basic_score, reasoning_score, advanced_score)) %>% filter(basic_score >= .5)
+basic_score_stats <- summary(basic$basic_score)
+basic_score_mode <- getmode(basic$basic_score)
+basic_score_stats
+```
+####Basic Mode: `r basic_score_mode`
+```{r}
+reasoning <-(healthy_scores %>% select(user_id, basic_score, reasoning_score, advanced_score)) %>% filter(reasoning_score >= .5)
+reasoning_score_stats <- summary(reasoning$reasoning_score)
+reasoning_score_mode <- getmode(reasoning$reasoning_score)
+reasoning_score_stats
+```
+####Reasoning Mode: `r reasoning_score_mode`
+```{r}
+advanced <-(healthy_scores %>% select(user_id, basic_score, reasoning_score, advanced_score)) %>% filter(advanced_score >= .5)
+advanced_score_stats <- summary(advanced$advanced_score)
+advanced_score_stats
+advanced_score_mode <- getmode(advanced$advanced_score)
+
+
+```
+####Advanced Reasoning Mode: `r reasoning_score_mode`
+
+##IMPAIRED
+```{r}
+basic_impaired <-(impaired_scores %>% select(user_id, basic_score, reasoning_score, advanced_score)) %>% filter(basic_score >= .5)
+basic_impaired_score_stats <- summary(basic_impaired$basic_score)
+basic_impaired_score_mode <- getmode(basic_impaired$basic_score)
+basic_impaired_score_stats
+```
+####Basic Mode: `r basic_impaired_score_mode`
+```{r}
+reasoning_impaired <-(impaired_scores %>% select(user_id, basic_score, reasoning_score, advanced_score)) %>% filter(reasoning_score >= .5)
+reasoning_impaired_score_stats <- summary(reasoning_impaired$reasoning_score)
+reasoning_impaired_score_mode <- getmode(reasoning_impaired$reasoning_score)
+reasoning_impaired_score_stats
+```
+####Reasoning Mode: `r reasoning_impaired_score_mode`
+```{r}
+advanced_impaired <-(impaired_scores %>% select(user_id, basic_score, reasoning_score, advanced_score)) %>% filter(advanced_score >= .5)
+advanced_impaired_score_stats <- summary(advanced_impaired$advanced_score)
+advanced_impaired_score_mode <- getmode(advanced_impaired$advanced_score)
+advanced_impaired_score_stats
+```
+####Advanced Mode: `r advanced_impaired_score_mode`
