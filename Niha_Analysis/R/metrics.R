@@ -1,7 +1,6 @@
 metrics <- function(bucket_device, test_metric){
   a <- c(nrow(bucket_device), mean(bucket_device[[test_metric]]),
          sd(bucket_device[[test_metric]]))
-  #names(a) <- c("N", "MEAN", "SD")
   return(a)
 }
 
