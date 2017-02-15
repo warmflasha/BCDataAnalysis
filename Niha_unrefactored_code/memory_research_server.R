@@ -8,20 +8,20 @@ library(pipefittr)
 library(janitor)
 library(purrr)
 
-load_batteries <- function(mypath = "/Users/Niha/Desktop/Braincheck/research_server/batteries_2017-02-03_22h48m55.csv"){
+load_batteries <- function(mypath = "/Users/Niha/Desktop/Old_Data/batteries_2017-02-03_22h48m55.csv"){
   mydf <- read.csv(mypath, stringsAsFactors = FALSE)
   return(mydf)
 }
-load_users <- function(mypath = "/Users/Niha/Desktop/Braincheck/research_server/users_2017-02-03_22h48m54.csv") {
+load_users <- function(mypath = "/Users/Niha/Desktop/Old_Data/users_2017-02-03_22h48m54.csv") {
   mydf <- read.csv(mypath, stringsAsFactors = FALSE)
   return(mydf)
 }
 
-load_new_stuff <- function(mypath = "/Users/Niha/Desktop/Braincheck/Code/.csv")
+#load_new_stuff <- function(mypath = "/Users/Niha/Desktop/Braincheck/Code/.csv")
 
 
 
-load_ruby_script <- function(mypath = "/Users/Niha/Desktop/ruby_data.csv") {
+load_ruby_script <- function(mypath = "/Users/Niha/Desktop/Old_Data/ruby_new_data.csv") {
   mydf <- read.csv(mypath, stringsAsFactors = FALSE)
   return(mydf)
 }
@@ -40,26 +40,31 @@ clean_user_scores <- function(user_scores) {
   
 } 
 
+clean_date_test_taken <-function(date){
+  date <- date %>% str_split(' ') %>% unlist()
+  return(date[1])
+}
 
-####Data Filtering###################
 
 batteries <- load_batteries() %>% clean_names() %>%
-  select(id, user_id, battery_type_id, organization_id, baseline, incomplete, raw_scores, device_model) %>%
+  select(-(created_at)) %>%
   rename(battery_id = id) %>%
-   filter(incomplete == 'f')
+  filter(incomplete == 'f')
 
 users <- load_users() %>% clean_names() %>%
-  select(id, date_of_birth) %>%
+  select(id, created_at, gender, date_of_birth) %>%
   rename(user_id = id) %>%
-  filter(!date_of_birth == "") %>%
   mutate(date_of_birth = ymd(date_of_birth)) 
-current_time <- now()
-users$age <- year(as.period(interval(ymd(users$date_of_birth), current_time)))
-dat <- users %>% left_join(batteries) %>%
-  select(user_id,battery_id,gender, age, battery_type_id, organization_id,baseline, device_model, raw_scores ) %>%
+
+dat <- users %>% left_join(batteries, by = "user_id") %>%
   filter(!raw_scores == "", baseline == 't')
 
 dat$raw_scores <- clean_user_scores(dat$raw_scores) 
+dat$created_at <- clean_date_test_taken(dat$created_at)
+
+dat <- dat %>% mutate(created_at = ymd(created_at))
+dat <- dat %>% 
+  mutate(age = year(as.period(interval(dat$date_of_birth, dat$created_at))))
 
 ###Split up dat into memory vs. concussion product
 test_modules <- c("stroop_reaction_time_incongruent_median", "digit_symbol_duration_median", "immediate_recall_correct", "delayed_recall_correct", "balance_mean_distance_from_center", "trails_b_duration_mean", "flanker_reaction_time_correct_median")
@@ -128,11 +133,10 @@ memory <- dat %>% filter(battery_type_id == 2, organization_id %in% organization
 
 ####Combine dataframes
  memory_fixed <- ruby_script %>% clean_names() %>% left_join(memory)  
- memory_fixed <- memory_fixed %>% select(-c(raw_scores, battery_type_id)) %>%
-            select(battery_id, user_id, age, device_model, lightlevel : hasdyslexia)
+ memory_fixed <- memory_fixed %>% select(-c(raw_scores)) 
 View(memory_fixed)
 
-combined %>% group_by(gender) %>%
+memory_fixed %>% group_by(gender) %>%
   summarise(n = n())  
 
 

@@ -22,15 +22,24 @@ clean_user_scores <- function(user_scores) {
   
 }
 
+clean_date_test_taken <-function(date){
+  date <- date %>% str_split(' ') %>% unlist()
+  return(date[1])
+}
+
+
+
  batteries <- load_batteries () %>% clean_names() %>%
-  select(battery, user, user_age, battery_type, baseline, incomplete, raw_scores, device_model) %>%
   rename(battery_id = battery) %>%
   rename(user_id = user) %>%
   rename(battery_type_id = battery_type) %>%
   rename(age = user_age) %>%
+  rename(gender = user_gender) %>%
   filter(incomplete == 'false', !raw_scores == "", baseline == "true")
 
-  batteries$raw_scores <- clean_user_scores(batteries$raw_scores) 
+  batteries$raw_scores <- clean_user_scores(batteries$raw_scores)
+  batteries$created_at <- clean_date_test_taken(batteries$created_at)
+  batteries <- batteries %>% mutate(created_at = ymd(created_at) )
 
 # 
 # load_bat_3 <- function(mypath = "/Users/Niha/Desktop/battery_type_3_cleaned_up.csv" )
@@ -78,5 +87,6 @@ View(clean_scores_df)
 clean_scores_df <- clean_scores_df %>% 
   select( stroop_reaction_time_incongruent_median, digit_symbol_duration_median, immediate_recall_correct, delayed_recall_correct, balance_mean_distance_from_center, trails_b_duration_mean, flanker_reaction_time_correct_median, battery_id)
 
-iPhone <- batteries %>% left_join(clean_scores_df, by = "battery_id") 
+iPhone <- batteries %>% left_join(clean_scores_df, by = "battery_id")  %>%
+            select(-c(user_first_name, user_last_name, user_email))
 write.csv(iPhone, file = "new_iphone_stuffs.csv")

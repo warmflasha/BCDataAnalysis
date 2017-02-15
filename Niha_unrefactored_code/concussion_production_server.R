@@ -8,11 +8,11 @@ library(pipefittr)
 library(janitor)
 library(purrr)
 
-load_batteries <- function(mypath = "/Users/Niha/Desktop/Braincheck/production_server/batteries_2017-02-03_19h46m01.csv"){
+load_batteries <- function(mypath = "/Users/Niha/Desktop/Old_Data/batteries_2017-02-03_19h46m01.csv"){
   mydf <- read.csv(mypath, stringsAsFactors = FALSE)
   return(mydf)
 }
-load_users <- function(mypath = "/Users/Niha/Desktop/Braincheck/production_server/users_2017-02-03_19h45m57.csv") {
+load_users <- function(mypath = "/Users/Niha/Desktop/Old_Data/users_2017-02-03_19h45m57.csv") {
   mydf <- read.csv(mypath, stringsAsFactors = FALSE)
   return(mydf)
 }
@@ -26,6 +26,11 @@ clean_user_scores <- function(user_scores) {
   
 } 
 
+clean_date_test_taken <-function(date){
+  date <- date %>% str_split(' ') %>% unlist()
+  return(date[1])
+}
+
 # get_key_val <- function(score_chunk) {
 #   key_val <- str_split(score_chunk, "=>") %>%
 #     unlist() %>% trimws()
@@ -38,28 +43,27 @@ source("R/filter_batteries.R")
 
   ####Data Filtering###################
 
-  
-what <- load_batteries()
-what <- filter_batteries(what)
-
 
 
   batteries <- load_batteries() %>% clean_names() %>%
+    select(-(created_at)) %>%
     rename(battery_id = id) %>%
     filter(incomplete == 'f')
   
   users <- load_users() %>% clean_names() %>%
     select(id, created_at, gender, date_of_birth) %>%
     rename(user_id = id) %>%
-    mutate(date_of_birth = ymd(date_of_birth)) %>%
-             ############
-    mutate(age = year(as.period(interval(ymd(users$date_of_birth), now()))))
+    mutate(date_of_birth = ymd(date_of_birth)) 
 
-  dat <- users %>% left_join(batteries) %>%
-    select(battery_id, user_id,age,gender, battery_type_id, organization_id,baseline,device_model, raw_scores ) %>%
+  dat <- users %>% left_join(batteries, by = "user_id") %>%
     filter(!raw_scores == "", baseline == 't')
   
   dat$raw_scores <- clean_user_scores(dat$raw_scores) 
+  dat$created_at <- clean_date_test_taken(dat$created_at)
+  
+  dat <- dat %>% mutate(created_at = ymd(created_at))
+  dat <- dat %>% 
+          mutate(age = year(as.period(interval(dat$date_of_birth, dat$created_at))))
 
   
   ###Split up dat into memory vs. concussion product
@@ -109,11 +113,6 @@ for(i in 2:nrow(score_chunks)) {
   
 }
 View(clean_scores_df)
-
-clean_scores_df <- clean_scores_df %>% 
-                    select( stroop_reaction_time_incongruent_median, digit_symbol_duration_median, immediate_recall_correct, delayed_recall_correct, balance_mean_distance_from_center, trails_b_duration_mean, flanker_reaction_time_correct_median, battery_id)
-
-concussion <- concussion %>% select(-c( battery_type_id, organization_id, baseline, raw_scores))
 
 
 combined <- concussion %>% left_join(clean_scores_df, by = "battery_id")

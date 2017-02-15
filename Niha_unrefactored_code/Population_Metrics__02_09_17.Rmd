@@ -57,7 +57,7 @@ trails_plot <- function(bucket, title) {
   trails <- bucket %>%
               group_by(trails_b_duration_mean) %>%
               summarise(n = n()) 
-  
+  1
   s <- ggplot(trails, aes(x = trails_b_duration_mean))
   s<- s + ylab("Frequency") +  ggtitle(title) + geom_histogram(colour = "black", fill = "#FF9999", binwidth = .15)   + theme_classic() 
   return(s)
@@ -245,9 +245,10 @@ sd(balance$balance_mean_distance_from_center)
 ```{r devices, echo=FALSE, message=FALSE, warning=FALSE}
 iPhone <- everything %>% filter(grepl("iPhone", device_model))
 iPad <- everything %>% filter(grepl("iPad", device_model))
-browser <- everything %>% filter(device_model == "browser")
+browser <- everything %>% filter(grepl("browser", device_model))
 ```
 ##IPhone
+
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 trails_device_age_bucket(iPhone, 10:13)
 plot_1_iPhone_trails <- trails_plot(iPhone %>% filter(age %in% 10:13), "Ages 10-13")

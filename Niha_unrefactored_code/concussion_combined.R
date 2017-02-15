@@ -10,12 +10,12 @@ library(purrr)
 
 
 
-load_concussion_production <- function(mypath = "/Users/Niha/Desktop/Braincheck/Code/concussion_production_data.csv"){
+load_concussion_production <- function(mypath = "/Users/Niha/Desktop/Old_Data/concussion_production_data.csv"){
   mydf <- read.csv(mypath, stringsAsFactors = FALSE)
   return(mydf)
 }
 
-load_concussion_research <- function(mypath = "/Users/Niha/Desktop/Braincheck/Code/concussion_research_data.csv"){
+load_concussion_research <- function(mypath = "/Users/Niha/Desktop/Old_Data/concussion_research_data.csv"){
   mydf <- read.csv(mypath, stringsAsFactors = FALSE)
   return(mydf)
 }
