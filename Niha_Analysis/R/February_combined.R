@@ -44,15 +44,7 @@ combine_all_data <- function(){
 
 dat <- combine_all_data()
 
-write.csv(dat, file = "02_10_17.csv")
+#write.csv(dat, file = "02_10_17.csv")
 test_modules <- c("stroop_reaction_time_incongruent_median", "digit_symbol_duration_median", "immediate_recall_correct", "delayed_recall_correct", "balance_mean_distance_from_center", "trails_b_duration_mean", "flanker_reaction_time_correct_median")
-##filter by device type
-iPhone <- dat %>% filter(grepl("iPhone", device_model)) 
-iPad <- dat %>% filter(grepl("iPad", device_model))
-browser <- dat %>% filter(grepl("browser", device_model))
 
-
-TODO FINISH
-#####IPHONE
-trails_b_duration_mean_metrics_iPhone <- iPhone %>% select(trails_b_duration_median) %>% drop_na()
 
