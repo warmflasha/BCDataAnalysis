@@ -14,10 +14,11 @@ opts_knit$set(root.dir = "/Users/Niha/Data-Analysis-BrainCheck/Niha_Analysis")
 ```{r libraries, include=FALSE, echo=FALSE}
 source("~/Data-Analysis-BrainCheck/Niha_Analysis/R/load_libraries.R")
 source("~/Data-Analysis-BrainCheck/Niha_Analysis/R/February_combined.R")
+source("~/Data-Analysis-BrainCheck/Niha_Analysis/R/metrics.R")
 
 df <- dat %>% select(age, device_model, stroop_reaction_time_incongruent_median,digit_symbol_duration_median, immediate_recall_correct,delayed_recall_correct, balance_mean_distance_from_center, trails_b_duration_mean, flanker_reaction_time_correct_median)
 
-df$agecat <-cut(df$age, c(10,14,19,36, 51, 66, 120), right = FALSE, labels = c("10-13", "14-18", "19-35", "36-50", "51-65", "66+"))
+df$agecat <-cut(df$age, c(10,14,19,36, 51, 66, 76,120), right = FALSE, labels = c("10-13", "14-18", "19-35", "36-50", "51-65", "66-75", "76+"))
 df$device <- NA
 df$device[grepl("iPhone",df$device_model)] <- "iPhone"
 df$device[grepl("iPad", df$device_model)] <- "iPad"
@@ -28,64 +29,76 @@ df$device[grepl("browser", df$device_model)] <- "browser"
 ```{r stroop overall, echo = FALSE}
 
 stroop <- df %>% select(agecat, device, stroop_reaction_time_incongruent_median) %>% drop_na()
-a <- ggplot(data = stroop, aes(stroop$stroop_reaction_time_incongruent_median)) + 
-                    geom_histogram(breaks = seq(0,5, by = 1), col = "pink", aes(fill = ..count..)) +
-                    scale_fill_gradient("Count", low = "pink", high = "purple")
-a + facet_grid(agecat ~ device) +  labs(title="Stroop Reaction Time Incongruent Median") +
-  labs(x="Stroop Reaction Time Incongruentm Median", y="Count")
+
+
+a <- ggplot() + geom_histogram(data = stroop, breaks = seq(0,5, by = .3), aes(y = ..ncount.., x = stroop$stroop_reaction_time_incongruent_median), col = "black", fill = "purple") + theme_gray()
+    
+      
+a + facet_grid(agecat ~ device) +  labs(title="Stroop Effect") +
+  labs(x="Stroop (sec)", y= "Frequency ") +
+  geom_vline(data = stroop, aes(xintercept= mean(stroop$stroop_reaction_time_incongruent_median, na.rm = T)),linetype = "dashed", color = "pink", size = .75) 
+  
+
 
 ````
+
 
 ```{r immediate recall overall, echo = FALSE}
 
 immediate_recall <- df %>% select(agecat, device, immediate_recall_correct) %>% drop_na()
-b <- ggplot(data = immediate_recall, aes(immediate_recall$immediate_recall_correct)) + 
-                    geom_histogram(breaks = seq(10,20, by = 2), col = "pink", aes(fill = ..count..)) +
-                    scale_fill_gradient("Count", low = "pink", high = "purple") 
-b + facet_grid(agecat ~ device) +  labs(title="Immediate Recall Correct") +
-  labs(x="Immediate Recall Correct", y="Count")
+
+b <- ggplot()  + geom_histogram(data = immediate_recall, breaks = seq(10,20.5, by = .75), aes( y =..ncount.., x = immediate_recall$immediate_recall_correct), col = "black", fill = "purple" ) 
+
+b + facet_grid(agecat ~ device) +  labs(title="Immediate Recall ") +
+  labs(x="Immediate Recall Correct (#)", y="Frequency") +
+  geom_vline(data = immediate_recall, aes(xintercept= mean(immediate_recall$immediate_recall_correct, na.rm = T)),linetype = "dashed", color = "pink", size = .75)
 
 ````
+
 ```{r delayed recall overall, echo = FALSE}
 
 delayed_recall <- df %>% select(agecat, device, delayed_recall_correct) %>% drop_na()
-c <- ggplot(data = delayed_recall, aes(delayed_recall$delayed_recall_correct)) + 
-                    geom_histogram(breaks = seq(10,20, by = 2), col = "pink", aes(fill = ..count..)) +
-                    scale_fill_gradient("Count", low = "pink", high = "purple") 
-c + facet_grid(agecat ~ device) +  labs(title="Delayed Recall Correct") +
-  labs(x="Delayed Recall Correct", y="Count")
+c <- ggplot()  + geom_histogram(data = delayed_recall, breaks = seq(10,20, by = .75), aes( y =..ncount.., x = delayed_recall$delayed_recall_correct), col = "black", fill = "purple" ) 
+              
+c + facet_grid(agecat ~ device) +  labs(title="Delayed Recall") +
+  labs(x="Delayed Recall Correct (#)", y="Frequency") +
+  geom_vline(data = delayed_recall, aes(xintercept= mean(delayed_recall$delayed_recall_correct, na.rm = T)),linetype = "dashed", color = "pink", size = .75)
+
 
 ````
 
 ```{r balance overall, echo = FALSE}
 
 balance <- df %>% select(agecat, device, balance_mean_distance_from_center) %>% drop_na()
-d <- ggplot(data = balance, aes(balance$balance_mean_distance_from_center)) + 
-                    geom_histogram(breaks = seq(13,380, by = 15), col = "pink", aes(fill = ..count..)) +
-                    scale_fill_gradient("Count", low = "pink", high = "purple") 
-d + facet_grid(agecat ~ device) +  labs(title="Balance Mean Distance from Center") +
-  labs(x="Balance Mean Distance from Center", y="Count")
+d <- ggplot()  + geom_histogram(data = balance, breaks = seq(13,380, by = 20), aes( y =..ncount.., x = balance$balance_mean_distance_from_center), col = "black", fill = "purple" ) 
+                   
+d + facet_grid(agecat ~ device) +  labs(title="Balance Test") +
+  labs(x="Balance Mean Distance from Center (pixels)", y="Frequency") + 
+  geom_vline(data = balance, aes(xintercept= mean(balance$balance_mean_distance_from_center, na.rm = T)),linetype = "dashed", color = "pink", size = .75)
+
 
 ````
 
 ```{r trails overall, echo = FALSE}
 
 trails <- df %>% select(agecat, device, trails_b_duration_mean) %>% drop_na()
-e <- ggplot(data = trails, aes(trails$trails_b_duration_mean)) + 
-                    geom_histogram(breaks = seq(0,12, by = 2), col = "pink", aes(fill = ..count..)) +
-                    scale_fill_gradient("Count", low = "pink", high = "purple") 
-e + facet_grid(agecat ~ device) +  labs(title="Trails B Duration Mean") +
-  labs(x="Trails B Duration Mean", y="Count")
+e <-ggplot()  + geom_histogram(data = trails, breaks = seq(0,10, by = .75), aes( y =..ncount.., x = trails$trails_b_duration_mean), col = "black", fill = "purple" ) 
+                     
+e + facet_grid(agecat ~ device) +  labs(title="Trails B Test") +
+  labs(x="Trails B Duration Mean (sec)", y="Frequency") +
+  geom_vline(data = trails, aes(xintercept= mean(trails$trails_b_duration_mean, na.rm = T)),linetype = "dashed", color = "pink", size = .75)
+
 
 ````
 
 ```{r flanker overall, echo = FALSE}
 
 flanker <- df %>% select(agecat, device, flanker_reaction_time_correct_median) %>% drop_na()
-f <- ggplot(data = flanker, aes(flanker$flanker_reaction_time_correct_median)) + 
-                    geom_histogram(breaks = seq(0,4, by = .5), col = "pink", aes(fill = ..count..)) +
-                    scale_fill_gradient("Count", low = "pink", high = "purple") 
-f + facet_grid(agecat ~ device) +  labs(title="Flanker Reaction Time Correct Median") +
-  labs(x="Flanker Reaction Time Correct MEdian", y="Count")
+f <- ggplot()  + geom_histogram(data = flanker, breaks = seq(0,4, by = .27), aes( y =..ncount.., x = flanker$flanker_reaction_time_correct_median), col = "black", fill = "purple" )  
+                    
+f + facet_grid(agecat ~ device) +  labs(title="Flanker Test") +
+  labs(x="Flanker Reaction Time Correct Median (sec)", y="Frequency") +
+  geom_vline(data = flanker, aes(xintercept= mean(flanker$flanker_reaction_time_correct_median, na.rm = T)),linetype = "dashed", color = "pink", size = .75)
+
 
 ````
