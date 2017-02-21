@@ -25,7 +25,7 @@ digit_symbol <- ddply(digit_symbol_df, c("device", "agecat"), summarise,
                 SD = sd(digit_symbol_duration_median, na.rm = TRUE))
 digit_symbol["Test"] <- "digit_symbol_duration_median"
 
-immediate_recall_df <- df %>% select(agecat, device, immediate_recall_correct) %>% drop_na()
+immediate_recall_df <- df %>% select(agecat, device, immediate_recall_correct) %>% drop_na() %>% mutate(immediate_recall_correct = immediate_recall)
 immediate_recall <- ddply(immediate_recall_df, c("device", "agecat"), summarise,
                       N = length(!is.na(immediate_recall_correct)),
                       mean = mean(immediate_recall_correct, na.rm = TRUE),
