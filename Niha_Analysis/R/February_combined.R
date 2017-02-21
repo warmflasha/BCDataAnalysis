@@ -1,6 +1,6 @@
 setwd("~/Data-Analysis-BrainCheck/Niha_Analysis")
 source("R/load_libraries.R")
-source("R/metrics.R")
+
 
 
 load_combined_concussion <- function(mypath = "cleaned_data/07_01_16_to_02_10_17/combined_concussion.csv"){
@@ -44,7 +44,5 @@ combine_all_data <- function(){
 
 dat <- combine_all_data()
 
-#write.csv(dat, file = "02_10_17.csv")
-test_modules <- c("stroop_reaction_time_incongruent_median", "digit_symbol_duration_median", "immediate_recall_correct", "delayed_recall_correct", "balance_mean_distance_from_center", "trails_b_duration_mean", "flanker_reaction_time_correct_median")
 
 

@@ -14,7 +14,7 @@ opts_knit$set(root.dir = "/Users/Niha/Data-Analysis-BrainCheck/Niha_Analysis")
 ```{r libraries, include=FALSE, echo=FALSE}
 source("~/Data-Analysis-BrainCheck/Niha_Analysis/R/load_libraries.R")
 source("~/Data-Analysis-BrainCheck/Niha_Analysis/R/February_combined.R")
-source("~/Data-Analysis-BrainCheck/Niha_Analysis/R/metrics.R")
+
 
 df <- dat %>% select(age, device_model, stroop_reaction_time_incongruent_median,digit_symbol_duration_median, immediate_recall_correct,delayed_recall_correct, balance_mean_distance_from_center, trails_b_duration_mean, flanker_reaction_time_correct_median)
 
@@ -35,7 +35,7 @@ stroop$device <- as.factor(stroop$device)
 
 stroop_n <- ddply(stroop, .(agecat, device),
                           summarize, 
-                          frequency = paste("n =",length(agecat)))
+                          frequency = paste("n =",length(stroop_reaction_time_incongruent_median)))
 
 a <- ggplot() + geom_histogram(data = stroop, breaks = seq(0,5, by = .3), aes(y = ..ncount.., x = stroop$stroop_reaction_time_incongruent_median), col = "black", fill = "purple") + theme_gray()
 

@@ -7,4 +7,4 @@ split_key_val <- function(raw_scores){
     matrix(ncol=2,byrow=T) %>%
     data.frame(stringsAsFactors=F)
   return(test_dat)
-}
+} 

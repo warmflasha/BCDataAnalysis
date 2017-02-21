@@ -1,0 +1,22 @@
+---
+title: "population_metrics"
+author: "Niha Pereira"
+date: "2/20/2017"
+output:
+  html_document: default
+---
+
+```{r setup, include=FALSE, echo = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require("knitr")
+opts_knit$set(root.dir = "/Users/Niha/Data-Analysis-BrainCheck/Niha_Analysis")
+
+```
+
+```{r, include = FALSE, echo = FALSE}
+source("~/Data-Analysis-BrainCheck/Niha_Analysis/R/population_metrics.R")
+```
+
+```{r kable, echo = FALSE}
+kable(population_stats)
+```
