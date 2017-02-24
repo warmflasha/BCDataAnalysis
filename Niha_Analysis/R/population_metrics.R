@@ -3,7 +3,10 @@ source("R/February_combined.R")
 
 df <- dat %>% select(age, device_model, stroop_reaction_time_incongruent_median,digit_symbol_duration_median, immediate_recall_correct,delayed_recall_correct, balance_mean_distance_from_center, trails_b_duration_mean, flanker_reaction_time_correct_median)
 
-df$agecat <-cut(df$age, c(10,14,19,36, 51, 66, 76,120), right = FALSE, labels = c("10-13", "14-18", "19-35", "36-50", "51-65", "66-75", "76+"))
+##NEW AGE BINS
+#df$agecat <-cut(df$age, c(10,14,19,36, 51, 66, 76,120), right = FALSE, labels = c("10-13", "14-18", "19-35", "36-50", "51-65", "66-75", "76+"))
+##OLD AGE BINS
+df$agecat <-cut(df$age, c(0,10,14,19,36, 51, 66,120), right = FALSE, labels = c("0-9", "10-13", "14-18", "19-35", "36-50", "51-65", "66-120"))
 df$device <- NA
 df$device[grepl("iPhone",df$device_model)] <- "iPhone"
 df$device[grepl("iPad", df$device_model)] <- "iPad"
@@ -25,7 +28,7 @@ digit_symbol <- ddply(digit_symbol_df, c("device", "agecat"), summarise,
                 SD = sd(digit_symbol_duration_median, na.rm = TRUE))
 digit_symbol["Test"] <- "digit_symbol_duration_median"
 
-immediate_recall_df <- df %>% select(agecat, device, immediate_recall_correct) %>% drop_na() %>% mutate(immediate_recall_correct = immediate_recall)
+immediate_recall_df <- df %>% select(agecat, device, immediate_recall_correct) %>% drop_na() 
 immediate_recall <- ddply(immediate_recall_df, c("device", "agecat"), summarise,
                       N = length(!is.na(immediate_recall_correct)),
                       mean = mean(immediate_recall_correct, na.rm = TRUE),
@@ -61,3 +64,6 @@ flanker <- ddply(flanker_df, c("device", "agecat"), summarise,
 flanker["Test"] <- "flanker_reaction_time_correct_median"
 
 population_stats <- stroop %>% bind_rows(digit_symbol, immediate_recall, delayed_recall, balance, trails, flanker)
+
+csv_view <- population_stats %>% select(mean, SD, device, agecat, Test )
+write.csv(csv_view, file = "population-data-2017-02-24.csv")

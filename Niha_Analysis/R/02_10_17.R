@@ -1,8 +1,6 @@
 setwd("~/Data-Analysis-BrainCheck/Niha_Analysis")
 source("R/load_libraries.R")
 
-
-
 load_combined_concussion <- function(mypath = "cleaned_data/07_01_16_to_02_10_17/combined_concussion.csv"){
   mydf <- read.csv(mypath, stringsAsFactors = FALSE)
   return(mydf)
@@ -42,7 +40,7 @@ combine_all_data <- function(){
     everything <- unique(everything)
 }
 
-dat <- combine_all_data()
+dat <- combine_all_data() %>% unique()
 
 
-
+View(dat)

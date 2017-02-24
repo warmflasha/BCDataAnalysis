@@ -1,8 +1,3 @@
-  filter_batteries <- function(bat){
-    bat <- bat %>% clean_names()
-    return(bat)
-  }
-  
   filter_users <- function(users) {
      users <- users %>% clean_names() %>%
       select(id, created_at, gender, date_of_birth) %>%
@@ -13,7 +8,3 @@
     return(users)
   }
   
-  join_batteries_users <- function(batteries, users) {
-    dat <- users %>% left_join(batteries) %>%
-      filter(!raw_scores == "", baseline == 't')
-  }
