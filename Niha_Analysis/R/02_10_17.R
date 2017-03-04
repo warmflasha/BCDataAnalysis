@@ -42,5 +42,6 @@ combine_all_data <- function(){
 
 dat <- combine_all_data() %>% unique()
 
-
-View(dat)
+path <- "02_10_17.feather"
+write_feather(dat, path)
+#dat <- read_feather(path)

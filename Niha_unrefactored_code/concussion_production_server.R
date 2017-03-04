@@ -89,9 +89,6 @@ split_key_val <- function(raw_scores){
 }
   score_chunks <- concussion[,c("battery_id", "raw_scores")]
 
-
-
-
 raw_scores_row_1 <- (split_key_val(score_chunks$raw_scores[[1]]))
 clean_scores_row_1 <- raw_scores_row_1[, 2]
 names(clean_scores_row_1) <- raw_scores_row_1[,1]  %>% clean_user_scores()

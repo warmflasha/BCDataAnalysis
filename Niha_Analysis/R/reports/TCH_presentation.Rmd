@@ -1,0 +1,50 @@
+---
+title: "TCH Presentation"
+author: "Niha Pereira"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+setwd("~/Data-Analysis-BrainCheck/Niha_Analysis")
+source("R/TCH_concussion.R")
+
+```
+
+```{r pressure, echo=FALSE}
+##map on healthy and concussed participants
+
+normal_youth <- normal_youth %>% ungroup() %>% select( stroop_reaction_time_incongruent_median, digit_symbol_duration_median, immediate_recall_correct, delayed_recall_correct, balance_mean_distance_from_center, trails_b_duration_mean, flanker_reaction_time_correct_median)
+
+concussed_youth <- concussed_youth %>% ungroup() %>% select( stroop_reaction_time_incongruent_median, digit_symbol_duration_median, immediate_recall_correct, delayed_recall_correct, balance_mean_distance_from_center, trails_b_duration_mean, flanker_reaction_time_correct_median)
+
+concussed_youth[,1:7] <- sapply(concussed_youth[,1:7], as.numeric)
+
+normal_youth$group <- 'Healthy'
+concussed_youth$group <- 'Concussion'
+
+t <- t.test(normal_youth$flanker_reaction_time_correct_median,concussed_youth$flanker_reaction_time_correct_median)
+
+groups_combined <- rbind(normal_youth, concussed_youth)
+
+##FLANKER
+flanker_plot <- ggplot(groups_combined, aes(flanker_reaction_time_correct_median, fill = group)) + geom_histogram(alpha = 0.5, breaks = seq(0,1.8, by = .05),aes(y = ..ncount..), position = 'identity', col = "black") 
+
+##DIGIT SYMBOL
+
+
+##STROOP
+
+##TRAILS B
+
+##COORDINATION
+
+##IMMEDIATE RECALL
+
+
+##DELAYED RECALL
+
+```

@@ -5,7 +5,7 @@ df <- dat %>% select(age, device_model, stroop_reaction_time_incongruent_median,
 
 ##NEW AGE BINS
 #df$agecat <-cut(df$age, c(10,14,19,36, 51, 66, 76,120), right = FALSE, labels = c("10-13", "14-18", "19-35", "36-50", "51-65", "66-75", "76+"))
-##OLD AGE BINS
+##OLD AGE BINS 
 df$agecat <-cut(df$age, c(0,10,14,19,36, 51, 66,120), right = FALSE, labels = c("0-9", "10-13", "14-18", "19-35", "36-50", "51-65", "66-120"))
 df$device <- NA
 df$device[grepl("iPhone",df$device_model)] <- "iPhone"

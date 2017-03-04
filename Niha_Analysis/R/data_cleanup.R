@@ -13,11 +13,12 @@ clean_date_test_taken <-function(date){
 }
 
 clean_admin_view_csv_header <- function(batteries){
-  batteries <- batteries %>% clean_names() %>%
+  batteries_cleaned <- batteries %>% clean_names() %>%
     rename(battery_id = battery) %>%
     rename(user_id = user) %>%
     rename(battery_type_id = battery_type) %>%
     rename(age = user_age) %>%
-    rename(gender = user_gender) %>%
-    filter(incomplete == 'FALSE', !raw_scores == "", baseline == "TRUE")
+    rename(gender = user_gender)
+    #filter(incomplete == 'FALSE', !raw_scores == "")
+    return(batteries_cleaned)
 }
