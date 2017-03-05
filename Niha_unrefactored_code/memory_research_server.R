@@ -37,7 +37,6 @@ clean_user_scores <- function(user_scores) {
     gsub('\\"', '', .) %>%
     gsub("researchData=>", '', .) %>%
     trimws()
-  
 } 
 
 clean_date_test_taken <-function(date){
