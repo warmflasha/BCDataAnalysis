@@ -7,9 +7,9 @@ clean_user_scores <- function(user_scores) {
   
 } 
 
-clean_date_test_taken <-function(date){
+clean_date_test_taken<-function(date){
   date <- date %>% str_split(' ') %>% unlist()
-  return(date[1])
+  return(date[[1]])
 }
 
 clean_admin_view_csv_header <- function(batteries){

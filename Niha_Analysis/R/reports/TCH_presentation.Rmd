@@ -18,7 +18,7 @@ source("http://peterhaschke.com/Code/multiplot.R")
 
 ```
 
-```{r pressure, echo=FALSE}
+```{r tests, echo=FALSE}
 
 ##FLANKER
 flanker_plot <- ggplot(groups_combined, aes(flanker_reaction_time_correct_median, fill = group)) + geom_histogram(alpha = 0.5, breaks = seq(0,1.8, by = .1),aes(y = ..ncount..), position = 'identity', col = "black") +
@@ -54,9 +54,10 @@ immediate_recall_plot <-ggplot(groups_combined, aes(percentage_immediate_recall_
 delayed_recall_plot <-ggplot(groups_combined, aes(percentage_delayed_recall_correct, fill = group)) + geom_histogram(alpha = 0.5, breaks = seq(.5,1, by = .03),aes(y = ..ncount..), position = 'identity', col = "black") +
   labs(x = "fraction correct", y = "Frequency", title = "Delayed Recall") + 
   theme_minimal() + guides(fill = "none")
-  
+```
 
-####Multiplot
+
+``````{r multiplot, echo=FALSE}
 multiplot(flanker_plot, digit_symbol_plot, stroop_plot, trails_plot, balance_plot, immediate_recall_plot, delayed_recall_plot, layout = matrix(c(1,2,3,4,5,0,6,7,0), nrow = 3, byrow = TRUE)) 
 
 ```

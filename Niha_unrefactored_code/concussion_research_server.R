@@ -57,7 +57,7 @@ dat <- users %>% left_join(batteries, by = "user_id") %>%
   filter(!raw_scores == "", baseline == 't')
 
 dat$raw_scores <- clean_user_scores(dat$raw_scores) 
-dat$created_at <- clean_date_test_taken(dat$created_at)
+dat$created_at <- lapply(dat$created_at,clean_date_test_taken)
 
 dat <- dat %>% mutate(created_at = ymd(created_at))
 dat <- dat %>% 
