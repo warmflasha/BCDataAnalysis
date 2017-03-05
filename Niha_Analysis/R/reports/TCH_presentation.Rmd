@@ -4,47 +4,59 @@ author: "Niha Pereira"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, echo = FALSE}
+require(knitr)
 knitr::opts_chunk$set(echo = TRUE)
+opts_knit$set(root.dir = "/Users/Niha/Data-Analysis-BrainCheck/Niha_Analysis")
 ```
 
-```{r}
+```{r, include = FALSE, echo = FALSE}
 setwd("~/Data-Analysis-BrainCheck/Niha_Analysis")
 source("R/TCH_concussion.R")
+source("http://peterhaschke.com/Code/multiplot.R")
+
 
 ```
 
 ```{r pressure, echo=FALSE}
-##map on healthy and concussed participants
-
-normal_youth <- normal_youth %>% ungroup() %>% select( stroop_reaction_time_incongruent_median, digit_symbol_duration_median, immediate_recall_correct, delayed_recall_correct, balance_mean_distance_from_center, trails_b_duration_mean, flanker_reaction_time_correct_median)
-
-concussed_youth <- concussed_youth %>% ungroup() %>% select( stroop_reaction_time_incongruent_median, digit_symbol_duration_median, immediate_recall_correct, delayed_recall_correct, balance_mean_distance_from_center, trails_b_duration_mean, flanker_reaction_time_correct_median)
-
-concussed_youth[,1:7] <- sapply(concussed_youth[,1:7], as.numeric)
-
-normal_youth$group <- 'Healthy'
-concussed_youth$group <- 'Concussion'
-
-t <- t.test(normal_youth$flanker_reaction_time_correct_median,concussed_youth$flanker_reaction_time_correct_median)
-
-groups_combined <- rbind(normal_youth, concussed_youth)
 
 ##FLANKER
-flanker_plot <- ggplot(groups_combined, aes(flanker_reaction_time_correct_median, fill = group)) + geom_histogram(alpha = 0.5, breaks = seq(0,1.8, by = .05),aes(y = ..ncount..), position = 'identity', col = "black") 
+flanker_plot <- ggplot(groups_combined, aes(flanker_reaction_time_correct_median, fill = group)) + geom_histogram(alpha = 0.5, breaks = seq(0,1.8, by = .1),aes(y = ..ncount..), position = 'identity', col = "black") +
+  labs(x = "median reaction time (s)", y = "Frequency", title = "Flanker") +
+  theme_minimal() + guides(fill = "none")
 
 ##DIGIT SYMBOL
-
+digit_symbol_plot <- ggplot(groups_combined, aes(digit_symbol_duration_median, fill = group)) + geom_histogram(alpha = 0.5, breaks = seq(1.2,3.3, by = .1),aes(y = ..ncount..), position = 'identity', col = "black") +
+  labs(x = "median duration (s)", y = "Frequency", title = "Digit Symbol") + 
+  theme_minimal() + guides(fill = "none")
 
 ##STROOP
+stroop_plot <- ggplot(groups_combined, aes(stroop_reaction_time_incongruent_median, fill = group)) + geom_histogram(alpha = 0.5, breaks = seq(1.5,4.5, by = .2),aes(y = ..ncount..), position = 'identity', col = "black") +
+  labs(x = "median reaction time (s)", y = "Frequency", title = "Stroop") + 
+  theme_minimal() + guides(fill = "none")
 
 ##TRAILS B
+trails_plot <- ggplot(groups_combined, aes(trails_b_duration_mean, fill = group)) + geom_histogram(alpha = 0.5, breaks = seq(0,4.0, by = .2),aes(y = ..ncount..), position = 'identity', col = "black") +
+  labs(x = "mean duration (s)", y = "Frequency", title = "Trails B") + 
+  theme_minimal() + guides(fill = "none")
 
-##COORDINATION
+##BALANCE
+balance_plot <- ggplot(groups_combined, aes(balance_mean_distance_from_center, fill = group)) + geom_histogram(alpha = 0.5, breaks = seq(0,500, by = 30),aes(y = ..ncount..), position = 'identity', col = "black") +
+  labs(x = "mean distance (pixels/100)", y = "Frequency", title = "Balance") + 
+  theme_minimal() + guides(fill = "none")
 
 ##IMMEDIATE RECALL
-
+immediate_recall_plot <-ggplot(groups_combined, aes(percentage_immediate_recall_correct, fill = group)) + geom_histogram(alpha = 0.5, breaks = seq(.5,1, by = .03),aes(y = ..ncount..), position = 'identity', col = "black") +
+  labs(x = "fraction correct", y = "Frequency", title = "Immediate Recall") + 
+  theme_minimal() + guides(fill = "none")
 
 ##DELAYED RECALL
+delayed_recall_plot <-ggplot(groups_combined, aes(percentage_delayed_recall_correct, fill = group)) + geom_histogram(alpha = 0.5, breaks = seq(.5,1, by = .03),aes(y = ..ncount..), position = 'identity', col = "black") +
+  labs(x = "fraction correct", y = "Frequency", title = "Delayed Recall") + 
+  theme_minimal() + guides(fill = "none")
+  
+
+####Multiplot
+multiplot(flanker_plot, digit_symbol_plot, stroop_plot, trails_plot, balance_plot, immediate_recall_plot, delayed_recall_plot, layout = matrix(c(1,2,3,4,5,0,6,7,0), nrow = 3, byrow = TRUE)) 
 
 ```

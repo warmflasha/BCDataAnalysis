@@ -28,8 +28,6 @@ batteries <- tch_batteries %>% rbind(morton_ranch_batteries) %>%
                     filter(!(user_id %in% invalid_users))
 batteries$raw_scores <- clean_user_scores(batteries$raw_scores) 
 
-###########################################################################################
-
 score_chunks <- batteries[,c("battery_id", "raw_scores")]
 
 raw_scores_row_1 <- (split_key_val(score_chunks$raw_scores[[1]]))
@@ -60,8 +58,31 @@ batteries <- batteries %>% select(battery_id, user_id, created_at, age, gender,s
 sorted_bat <- batteries %>% group_by(user_id) %>% arrange(battery_id)
 concussed_youth <- sorted_bat[!duplicated(sorted_bat$user_id),]
 
-youth <- normal_pop %>% filter(age %in% 10:18)
+normal_pop <- normal_pop %>% select(battery_id, user_id, gender, age, created_at, battery_type_id, stroop_reaction_time_incongruent_median, digit_symbol_duration_median, immediate_recall_correct, delayed_recall_correct, balance_mean_distance_from_center, trails_b_duration_mean, flanker_reaction_time_correct_median)
+
+
+
+youth <- normal_pop %>% filter(age %in% 10:18, battery_type_id == 1)  %>% drop_na()
 normal_age_group_1 <- youth %>% filter(age %in% 10:13) %>% sample_n(5)
 normal_age_group_2 <- youth %>% filter(age %in% 14:18) %>% sample_n(16)
 normal_youth <- normal_age_group_1 %>% bind_rows(normal_age_group_2)
+
+
+normal_youth <- normal_youth %>% ungroup() %>% 
+                select( stroop_reaction_time_incongruent_median, digit_symbol_duration_median, immediate_recall_correct, delayed_recall_correct, balance_mean_distance_from_center, trails_b_duration_mean, flanker_reaction_time_correct_median) %>% 
+                mutate(percentage_immediate_recall_correct = (immediate_recall_correct/20), percentage_delayed_recall_correct = (delayed_recall_correct/20))
+
+concussed_youth[,6:12] <- sapply(concussed_youth[,6:12], as.numeric)
+
+concussed_youth <- concussed_youth %>% ungroup() %>% 
+                  select( stroop_reaction_time_incongruent_median, digit_symbol_duration_median, immediate_recall_correct, delayed_recall_correct, balance_mean_distance_from_center, trails_b_duration_mean, flanker_reaction_time_correct_median) %>%
+  mutate(percentage_immediate_recall_correct = (immediate_recall_correct/20), percentage_delayed_recall_correct = (delayed_recall_correct/20))
+
+
+normal_youth$group <- 'Healthy'
+concussed_youth$group <- 'Concussion'
+
+t <- t.test(normal_youth$flanker_reaction_time_correct_median,concussed_youth$flanker_reaction_time_correct_median)
+
+groups_combined <- rbind(normal_youth, concussed_youth)
 
