@@ -1,5 +1,7 @@
+source("R/load_libraries.R")
 setwd("~/Data-Analysis-BrainCheck/Niha_Analysis")
-source("R/February_combined.R")
+path <- "feather/02_10_17.feather"
+dat <- read_feather(path)
 
 df <- dat %>% select(age, device_model, stroop_reaction_time_incongruent_median,digit_symbol_duration_median, immediate_recall_correct,delayed_recall_correct, balance_mean_distance_from_center, trails_b_duration_mean, flanker_reaction_time_correct_median)
 
@@ -65,5 +67,5 @@ flanker["Test"] <- "flanker_reaction_time_correct_median"
 
 population_stats <- stroop %>% bind_rows(digit_symbol, immediate_recall, delayed_recall, balance, trails, flanker)
 
-csv_view <- population_stats %>% select(mean, SD, device, agecat, Test )
+csv_view <- population_stats %>% select(mean, SD, N, device, agecat, Test )
 write.csv(csv_view, file = "population-data-2017-02-24.csv")

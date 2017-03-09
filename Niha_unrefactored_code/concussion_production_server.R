@@ -26,11 +26,10 @@ clean_user_scores <- function(user_scores) {
   
 } 
 
-clean_date_test_taken <-function(date){
+clean_date_test_taken<-function(date){
   date <- date %>% str_split(' ') %>% unlist()
-  return(date[1])
+  return(date[[1]])
 }
-
 # get_key_val <- function(score_chunk) {
 #   key_val <- str_split(score_chunk, "=>") %>%
 #     unlist() %>% trimws()
@@ -59,7 +58,7 @@ source("R/filter_batteries.R")
     filter(!raw_scores == "", baseline == 't')
   
   dat$raw_scores <- clean_user_scores(dat$raw_scores) 
-  dat$created_at <- clean_date_test_taken(dat$created_at)
+  dat$created_at <- lapply(dat$created_at, clean_date_test_taken)
   
   dat <- dat %>% mutate(created_at = ymd(created_at))
   dat <- dat %>% 

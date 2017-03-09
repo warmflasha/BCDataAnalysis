@@ -62,27 +62,68 @@ normal_pop <- normal_pop %>% select(battery_id, user_id, gender, age, created_at
 
 
 
-youth <- normal_pop %>% filter(age %in% 10:18, battery_type_id == 1)  %>% drop_na()
-normal_age_group_1 <- youth %>% filter(age %in% 10:13) %>% sample_n(5)
-normal_age_group_2 <- youth %>% filter(age %in% 14:18) %>% sample_n(16)
-normal_youth <- normal_age_group_1 %>% bind_rows(normal_age_group_2)
-
-
+normal_youth <- normal_pop %>% filter(age %in% 10:18, battery_type_id == 1)
 normal_youth <- normal_youth %>% ungroup() %>% 
-                select( stroop_reaction_time_incongruent_median, digit_symbol_duration_median, immediate_recall_correct, delayed_recall_correct, balance_mean_distance_from_center, trails_b_duration_mean, flanker_reaction_time_correct_median) %>% 
+                select( age,stroop_reaction_time_incongruent_median, digit_symbol_duration_median, immediate_recall_correct, delayed_recall_correct, balance_mean_distance_from_center, trails_b_duration_mean, flanker_reaction_time_correct_median) %>% 
                 mutate(percentage_immediate_recall_correct = (immediate_recall_correct/20), percentage_delayed_recall_correct = (delayed_recall_correct/20))
 
 concussed_youth[,6:12] <- sapply(concussed_youth[,6:12], as.numeric)
 
 concussed_youth <- concussed_youth %>% ungroup() %>% 
-                  select( stroop_reaction_time_incongruent_median, digit_symbol_duration_median, immediate_recall_correct, delayed_recall_correct, balance_mean_distance_from_center, trails_b_duration_mean, flanker_reaction_time_correct_median) %>%
+                  select( age,stroop_reaction_time_incongruent_median, digit_symbol_duration_median, immediate_recall_correct, delayed_recall_correct, balance_mean_distance_from_center, trails_b_duration_mean, flanker_reaction_time_correct_median) %>%
   mutate(percentage_immediate_recall_correct = (immediate_recall_correct/20), percentage_delayed_recall_correct = (delayed_recall_correct/20))
 
 
 normal_youth$group <- 'Healthy'
 concussed_youth$group <- 'Concussion'
 
-t <- t.test(normal_youth$flanker_reaction_time_correct_median,concussed_youth$flanker_reaction_time_correct_median)
+###Flanker
+normal_flanker_df <- normal_youth%>% select(group, flanker_reaction_time_correct_median) %>% drop_na()
+concussed_flanker_df <- concussed_youth %>% select(group, flanker_reaction_time_correct_median) %>% drop_na()
+##Stroop
+normal_stroop_df <- normal_youth%>% select(group, stroop_reaction_time_incongruent_median) %>% drop_na()
+concussed_stroop_df <- concussed_youth %>% select(group, stroop_reaction_time_incongruent_median) %>% drop_na()
+##Digit-Symbol
+normal_digit_symbol_df <- normal_youth%>% select(group, digit_symbol_duration_median) %>% drop_na()
+concussed_digit_symbol_df <- concussed_youth %>% select(group, digit_symbol_duration_median) %>% drop_na()
+##Trails
+normal_trails_df <- normal_youth%>% select(group, trails_b_duration_mean) %>% drop_na()
+concussed_trails_df <- concussed_youth %>% select(group, trails_b_duration_mean) %>% drop_na()
+##Balance
+normal_balance_df <- normal_youth%>% select(group, balance_mean_distance_from_center) %>% drop_na()
+concussed_balance_df <- concussed_youth %>% select(group, balance_mean_distance_from_center) %>% drop_na()
+##Immediate Recall
+normal_immediate_recall_df <- normal_youth%>% select(group, percentage_immediate_recall_correct) %>% drop_na()
+concussed_immediate_recall_df <- concussed_youth %>% select(group, percentage_immediate_recall_correct) %>% drop_na()
+##Delayed Recall
+normal_delayed_recall_df <- normal_youth%>% select(group, percentage_delayed_recall_correct) %>% drop_na()
+concussed_delayed_recall_df <- concussed_youth %>% select(group, percentage_delayed_recall_correct) %>% drop_na()
 
-groups_combined <- rbind(normal_youth, concussed_youth)
 
+##T-tests
+flanker_t <- tidy(t.test(normal_flanker_df$flanker_reaction_time_correct_median,concussed_flanker_df$flanker_reaction_time_correct_median))  
+stroop_t <- tidy(t.test(normal_stroop_df$stroop_reaction_time_incongruent_median,concussed_stroop_df$stroop_reaction_time_incongruent_median))
+digit_symbol_t <- tidy(t.test(normal_digit_symbol_df$digit_symbol_duration_median,concussed_digit_symbol_df$digit_symbol_duration_median))
+trails_t <- tidy(t.test(normal_trails_df$trails_b_duration_mean,concussed_trails_df$trails_b_duration_mean))
+balance_t <- tidy(t.test(normal_balance_df$balance_mean_distance_from_center,concussed_balance_df$balance_mean_distance_from_center))
+immediate_recall_t <- tidy(t.test(normal_immediate_recall_df$percentage_immediate_recall_correct,concussed_immediate_recall_df$percentage_immediate_recall_correct))
+delayed_recall_t <- tidy(t.test(normal_delayed_recall_df$percentage_delayed_recall_correct,concussed_delayed_recall_df$percentage_delayed_recall_correct))
+
+
+##K-S tests
+flanker_ks<- tidy(ks.test(normal_flanker_df$flanker_reaction_time_correct_median,concussed_flanker_df$flanker_reaction_time_correct_median))
+stroop_ks <- tidy(ks.test(normal_stroop_df$stroop_reaction_time_incongruent_median,concussed_stroop_df$stroop_reaction_time_incongruent_median))
+digit_symbol_ks <- tidy(ks.test(normal_digit_symbol_df$digit_symbol_duration_median,concussed_digit_symbol_df$digit_symbol_duration_median))
+trails_ks <- tidy(ks.test(normal_trails_df$trails_b_duration_mean,concussed_trails_df$trails_b_duration_mean))
+balance_ks <- tidy(ks.test(normal_balance_df$balance_mean_distance_from_center,concussed_balance_df$balance_mean_distance_from_center))
+immediate_recall_ks <- tidy(ks.test(normal_immediate_recall_df$percentage_immediate_recall_correct,concussed_immediate_recall_df$percentage_immediate_recall_correct))
+delayed_recall_ks <- tidy(ks.test(normal_delayed_recall_df$percentage_delayed_recall_correct,concussed_delayed_recall_df$percentage_delayed_recall_correct))
+
+
+flanker_groups_combined <- rbind(normal_flanker_df, concussed_flanker_df)
+stroop_groups_combined <- rbind(normal_stroop_df, concussed_stroop_df)
+digit_symbol_groups_combined <- rbind(normal_digit_symbol_df, concussed_digit_symbol_df)
+trails_groups_combined <- rbind(normal_trails_df, concussed_trails_df)
+balance_groups_combined <- rbind(normal_balance_df, concussed_balance_df)
+immediate_recall_groups_combined <- rbind(normal_immediate_recall_df, concussed_immediate_recall_df)
+delayed_recall_groups_combined <- rbind(normal_delayed_recall_df, concussed_delayed_recall_df)

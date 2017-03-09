@@ -15,6 +15,7 @@ opts_knit$set(root.dir = "/Users/Niha/Data-Analysis-BrainCheck/Niha_Analysis")
 
 ```{r, include = FALSE, echo = FALSE}
 source("~/Data-Analysis-BrainCheck/Niha_Analysis/R/population_metrics.R")
+source("R/load_libraries.R")
 ```
 
 ```{r kable, echo = FALSE}

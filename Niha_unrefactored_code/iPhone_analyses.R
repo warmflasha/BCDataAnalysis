@@ -8,7 +8,7 @@ library(pipefittr)
 library(janitor)
 library(purrr)
 
-load_batteries <- function(mypath = "/Users/Niha/Desktop/batteries-2017-02-10 (1).csv"){
+load_batteries <- function(mypath = "/Users/Niha/Desktop/Old_Data/batteries-2017-02-10 (1).csv"){
   mydf <- read.csv(mypath, stringsAsFactors = FALSE)
   return(mydf)
 }
@@ -22,9 +22,9 @@ clean_user_scores <- function(user_scores) {
   
 }
 
-clean_date_test_taken <-function(date){
+clean_date_test_taken<-function(date){
   date <- date %>% str_split(' ') %>% unlist()
-  return(date[1])
+  return(date[[1]])
 }
 
 
@@ -38,7 +38,7 @@ clean_date_test_taken <-function(date){
   filter(incomplete == 'false', !raw_scores == "", baseline == "true")
 
   batteries$raw_scores <- clean_user_scores(batteries$raw_scores)
-  batteries$created_at <- clean_date_test_taken(batteries$created_at)
+  batteries$created_at <- lapply(batteries$created_at, clean_date_test_taken)
   batteries <- batteries %>% mutate(created_at = ymd(created_at) )
 
 # 

@@ -44,4 +44,4 @@ dat <- combine_all_data() %>% unique()
 
 path <- "02_10_17.feather"
 write_feather(dat, path)
-#dat <- read_feather(path)
+

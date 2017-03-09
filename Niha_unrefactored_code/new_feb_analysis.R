@@ -36,11 +36,10 @@ clean_user_scores <- function(user_scores) {
   
 }
 
-clean_date_test_taken <-function(date){
+clean_date_test_taken<-function(date){
   date <- date %>% str_split(' ') %>% unlist()
-  return(date[1])
+  return(date[[1]])
 }
-
 
 batteries <- load_new_stuff () 
 
@@ -54,7 +53,7 @@ batteries <- batteries %>% clean_names() %>%
 
 
 batteries$raw_scores <- clean_user_scores(batteries$raw_scores) 
-batteries$created_at <- clean_date_test_taken(batteries$created_at)
+batteries$created_at <- lapply(batteries$created_at, clean_date_test_taken)
 batteries <- batteries %>% mutate(created_at = mdy(created_at) )
 
 
