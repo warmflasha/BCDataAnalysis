@@ -1,9 +1,10 @@
 source("R/load_libraries.R")
+source("R/03_02_17.R")
 setwd("~/Data-Analysis-BrainCheck/Niha_Analysis")
-path <- "feather/02_10_17.feather"
-dat <- read_feather(path)
+#path <- "feather/02_10_17.feather"
+#dat <- read_feather(path)
 
-df <- dat %>% select(age, device_model, stroop_reaction_time_incongruent_median,digit_symbol_duration_median, immediate_recall_correct,delayed_recall_correct, balance_mean_distance_from_center, trails_b_duration_mean, flanker_reaction_time_correct_median)
+df <- normal_pop_updated %>% select(age, device_model, stroop_reaction_time_incongruent_median,digit_symbol_duration_median, immediate_recall_correct,delayed_recall_correct, balance_mean_distance_from_center, trails_b_duration_mean, flanker_reaction_time_correct_median)
 
 ##NEW AGE BINS
 #df$agecat <-cut(df$age, c(10,14,19,36, 51, 66, 76,120), right = FALSE, labels = c("10-13", "14-18", "19-35", "36-50", "51-65", "66-75", "76+"))

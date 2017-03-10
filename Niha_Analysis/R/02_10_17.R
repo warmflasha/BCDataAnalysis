@@ -38,6 +38,10 @@ combine_all_data <- function(){
     concussion_memory_feb <- concussion_memory_combined %>% full_join(new_things)
     everything <- concussion_memory_feb %>% full_join(new_iphone_things)
     everything <- unique(everything)
+    everything$created_at <- ymd( everything$created_at)
+    everything$date_of_birth <- ymd(everything$date_of_birth)
+    return(everything)
+
 }
 
 dat <- combine_all_data() %>% unique()

@@ -123,3 +123,15 @@ test_cols_production <- which(colnames(production_dat)=='stroop_reaction_time_in
 production_dat[, test_cols_production] <- lapply(production_dat[, test_cols_production], as.numeric)
 
 ####COMBINE RESEARCH/PRODUCTION DATA
+combined <- research_dat %>% full_join(production_dat)
+
+####join with normal pop data
+combined$administered_at <- as.character(combined$administered_at)
+combined$updated_at <- as.character(combined$updated_at)
+combined$baseline <- as.character(combined$baseline)
+combined$incomplete <- as.character(combined$incomplete)
+
+normal_pop_updated <- normal_pop %>% full_join(combined, by =c("user_id", "date_of_birth", "gender", "battery_id", "battery_type_id", "administered_by_id", "created_at", "updated_at", "device_id", "organization_id", "baseline", "incomplete", "scores", "raw_scores", "device_model", "os_version", "version", "age", "stroop_reaction_time_incongruent_median", "digit_symbol_duration_median", "delayed_recall_correct", "immediate_recall_correct", "balance_mean_distance_from_center", "trails_b_duration_mean", "flanker_reaction_time_correct_median"))
+
+normal_pop_updated <- normal_pop_updated %>% select(-c(administered_at.x, completed_at.x, completed_at.y, speedometer_score.x, speedometer_score.y, notes.x, notes_updated_at.y, notes_updated_at.x, notes_updated_at.y, malingering.x, malingering.y))
+
