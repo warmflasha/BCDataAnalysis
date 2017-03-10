@@ -23,8 +23,6 @@ raw_scores_query <- "SELECT id,
                   raw_scores -> 'trails_b_duration_mean' AS trails_b_duration_mean,
                   raw_scores -> 'flanker_reaction_time_correct_median' AS flanker_reaction_time_correct_median
                   FROM batteries"
-
-
 other_query <- "SELECT DISTINCT skeys(raw_scores) FROM batteries"
 
 ####RAW_SCORES RESEARCH
@@ -108,10 +106,10 @@ test_cols_research <- which(colnames(research_dat)=='stroop_reaction_time_incong
 
 research_dat[, test_cols_research] <- lapply(research_dat[, test_cols_research], as.numeric)
 
-
-normal_slums_user_ids <- c(1140,1141, 1146, 1153, 1155, 1158, 1160, 1164, 1166, 1169, 
-                           1170, 1175, 1176, 1190,1191,1197, 1198, 684, 954, 968, 982, 1008, 1093)
-#research_dat <- research_dat %>% filter(user_id %in% normal_slums_user_ids)
+normal_users <- c(1184, 1187, 1188, 1189, 1200, 1201,1204,1205, 1211, 1212, 1213, 1221, 1230, 1231, 1235, 1236)
+research_dat <- research_dat %>% filter(user_id %in% normal_users)
+sorted_research_dat <- research_dat %>% group_by(user_id) %>% arrange(battery_id)
+research_dat <- sorted_research_dat[!duplicated(sorted_research_dat$user_id),]
 
 
 
@@ -133,5 +131,5 @@ combined$incomplete <- as.character(combined$incomplete)
 
 normal_pop_updated <- normal_pop %>% full_join(combined, by =c("user_id", "date_of_birth", "gender", "battery_id", "battery_type_id", "administered_by_id", "created_at", "updated_at", "device_id", "organization_id", "baseline", "incomplete", "scores", "raw_scores", "device_model", "os_version", "version", "age", "stroop_reaction_time_incongruent_median", "digit_symbol_duration_median", "delayed_recall_correct", "immediate_recall_correct", "balance_mean_distance_from_center", "trails_b_duration_mean", "flanker_reaction_time_correct_median"))
 
-normal_pop_updated <- normal_pop_updated %>% select(-c(administered_at.x, completed_at.x, completed_at.y, speedometer_score.x, speedometer_score.y, notes.x, notes_updated_at.y, notes_updated_at.x, notes_updated_at.y, malingering.x, malingering.y))
+normal_pop_updated <- normal_pop_updated %>% select(-c(X,administered_at.x, completed_at.x, completed_at.y, speedometer_score.x, speedometer_score.y, notes.x, notes_updated_at.y, notes_updated_at.x, notes_updated_at.y, malingering.x, malingering.y))
 
