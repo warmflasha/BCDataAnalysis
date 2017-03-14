@@ -1,0 +1,168 @@
+
+---
+title: "Normative Population"
+author: "Niha Pereira"
+date: "March 2, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require("knitr")
+opts_knit$set(root.dir = "/Users/Niha/Data-Analysis-BrainCheck/Niha_Analysis")
+```
+
+```{r libraries, include=FALSE, echo=FALSE}
+source("~/Data-Analysis-BrainCheck/Niha_Analysis/R/load_libraries.R")
+source("~/Data-Analysis-BrainCheck/Niha_Analysis/R/03_02_17.R")
+
+
+df <- normal_pop_updated %>% select(age, device_model, stroop_reaction_time_incongruent_median,digit_symbol_duration_median, immediate_recall_correct,delayed_recall_correct, balance_mean_distance_from_center, trails_b_duration_mean, flanker_reaction_time_correct_median)
+
+df$agecat <-cut(df$age, c(10,14,19,36, 51, 66, 76,120), right = FALSE, labels = c("10-13", "14-18", "19-35", "36-50", "51-65", "66-75", "76+"))
+df$device <- NA
+df$device[grepl("iPhone",df$device_model)] <- "iPhone"
+df$device[grepl("iPad", df$device_model)] <- "iPad"
+df$device[grepl("browser", df$device_model)] <- "browser"
+
+```
+
+```{r flanker overall, echo = FALSE}
+
+flanker <- df %>% select(agecat, device, flanker_reaction_time_correct_median) %>% drop_na()
+flanker_n <- ddply(flanker, .(agecat, device),
+                          summarize, 
+                          frequency = paste("n =",length(agecat)))
+flanker_vline_means <-ddply(flanker, c("device", "agecat"), summarise,
+                mean = mean(flanker_reaction_time_correct_median, na.rm = TRUE))
+f <- ggplot()  + geom_histogram(data = flanker, breaks = seq(0,4, by = .27), aes( y =..ncount.., x = flanker$flanker_reaction_time_correct_median), col = "black", fill = "purple" )  
+                    
+f + facet_grid(agecat ~ device) +  labs(title="Flanker Test") +
+  labs(x="Flanker Reaction Time Correct Median (sec)", y="Frequency") +
+   geom_vline(data = flanker_vline_means, aes(xintercept = mean),linetype = "dashed", color = "pink", size = .75) +
+  geom_text(data = flanker_n, aes(x = 3.5, y= .8, label=frequency),size = 3,colour="black", inherit.aes=FALSE, parse=FALSE)
+
+
+````
+
+```{r digit symbol overall, echo = FALSE}
+
+digit_symbol <- df %>% select(agecat, device, digit_symbol_duration_median) %>% drop_na()
+digit_symbol_n <- ddply(digit_symbol, .(agecat, device),
+                          summarize, 
+                          frequency = paste("n =",length(agecat)))
+digit_symbol_vline_means <-ddply(digit_symbol, c("device", "agecat"), summarise,
+                mean = mean(digit_symbol_duration_median, na.rm = TRUE))
+f <- ggplot()  + geom_histogram(data = digit_symbol, breaks = seq(0,10, by = .6), aes( y =..ncount.., x = digit_symbol$digit_symbol_duration_median), col = "black", fill = "purple" )  
+                    
+f + facet_grid(agecat ~ device) +  labs(title="Digit Symbol Substitution") +
+  labs(x="Digit Symbol Duration Median (sec)", y="Frequency") +
+  geom_vline(data = digit_symbol_vline_means, aes(xintercept = mean),linetype = "dashed", color = "pink", size = .9) +
+  geom_text(data = digit_symbol_n, aes(x = 9, y= .8, label=frequency),size = 3,colour="black", inherit.aes=FALSE, parse=FALSE) 
+
+
+````
+
+
+```{r stroop overall, echo = FALSE}
+
+stroop <- df %>% select(agecat, device, stroop_reaction_time_incongruent_median) %>% drop_na()
+
+stroop$agecat <- as.factor(stroop$agecat)
+stroop$device <- as.factor(stroop$device)
+
+stroop_n <- ddply(stroop, .(agecat, device),
+                          summarize, 
+                          frequency = paste("n =",length(stroop_reaction_time_incongruent_median)))
+
+stroop_vline_means <-ddply(stroop, c("device", "agecat"), summarise,
+                mean = mean(stroop_reaction_time_incongruent_median, na.rm = TRUE))
+
+a <- ggplot() + geom_histogram(data = stroop, breaks = seq(0,5, by = .3), aes(y = ..ncount.., x = stroop$stroop_reaction_time_incongruent_median), col = "black", fill = "purple") + theme_gray()
+
+a + facet_grid(agecat ~ device) +  labs(title="Stroop Effect") +
+  labs(x="Stroop (sec)", y= "Frequency ") +
+  geom_vline(data = stroop_vline_means, aes(xintercept = mean),linetype = "dashed", color = "pink", size = .75) + geom_text(data = stroop_n, aes(x = 4.5, y= .8, label=frequency),size = 3,colour="black", inherit.aes=FALSE, parse=FALSE)
+  
+  
+````
+
+```{r trails overall, echo = FALSE}
+
+trails <- df %>% select(agecat, device, trails_b_duration_mean) %>% drop_na()
+trails_n <- ddply(trails, .(agecat, device),
+                          summarize, 
+                          frequency = paste("n =",length(agecat)))
+trails_vline_means <-ddply(trails, c("device", "agecat"), summarise,
+                mean = mean(trails_b_duration_mean, na.rm = TRUE))
+e <-ggplot()  + geom_histogram(data = trails, breaks = seq(0,10, by = .75), aes( y =..ncount.., x = trails$trails_b_duration_mean), col = "black", fill = "purple" ) 
+                     
+e + facet_grid(agecat ~ device) +  labs(title="Trails B Test") +
+  labs(x="Trails B Duration Mean (sec)", y="Frequency") +
+  geom_vline(data = trails_vline_means, aes(xintercept = mean),linetype = "dashed", color = "pink", size = .75) +
+  geom_text(data = trails_n, aes(x = 9, y= .8, label=frequency),size = 3,colour="black", inherit.aes=FALSE, parse=FALSE)
+
+
+````
+
+```{r balance overall, echo = FALSE}
+
+balance <- df %>% select(agecat, device, balance_mean_distance_from_center) %>% drop_na()
+balance_n <- ddply(balance, .(agecat, device),
+                          summarize, 
+                          frequency = paste("n =",length(agecat)))
+balance_vline_means <-ddply(balance, c("device", "agecat"), summarise,
+                mean = mean(balance_mean_distance_from_center, na.rm = TRUE))
+d <- ggplot()  + geom_histogram(data = balance, breaks = seq(13,300, by = 15), aes( y =..ncount.., x = balance$balance_mean_distance_from_center), col = "black", fill = "purple" ) 
+                   
+d + facet_grid(agecat ~ device) +  labs(title="Balance Test") +
+  labs(x="Balance Mean Distance from Center (pixels)", y="Frequency") + 
+  geom_vline(data = balance_vline_means, aes(xintercept = mean),linetype = "dashed", color = "pink", size = .75) + 
+  geom_text(data = balance_n, aes(x = 280, y= .8, label=frequency),size = 3,colour="black", inherit.aes=FALSE, parse=FALSE)
+
+
+````
+
+
+```{r immediate recall overall, echo = FALSE}
+
+immediate_recall <- df %>% select(agecat, device, immediate_recall_correct) %>% drop_na()
+immediate_recall_n <- ddply(immediate_recall, .(agecat, device),
+                          summarize, 
+                          frequency = paste("n =",length(agecat)))
+immediate_recall_vline_means <-ddply(immediate_recall, c("device", "agecat"), summarise,
+                mean = mean(immediate_recall_correct, na.rm = TRUE))
+
+b <- ggplot()  + geom_histogram(data = immediate_recall, breaks = seq(10,20.5, by = .7), aes( y =..ncount.., x = immediate_recall$immediate_recall_correct), col = "black", fill = "purple" ) 
+
+b + facet_grid(agecat ~ device) +  labs(title="Immediate Recall ") +
+  labs(x="Immediate Recall Correct (#)", y="Frequency") +
+ geom_vline(data = immediate_recall_vline_means, aes(xintercept = mean),linetype = "dashed", color = "pink", size = .75)+
+ geom_text(data = immediate_recall_n, aes(x = 11, y= .8, label=frequency),size = 3,colour="black", inherit.aes=FALSE, parse=FALSE)
+
+````
+
+```{r delayed recall overall, echo = FALSE}
+
+delayed_recall <- df %>% select(agecat, device, delayed_recall_correct) %>% drop_na()
+delayed_recall_n <- ddply(delayed_recall, .(agecat, device),
+                          summarize, 
+                          frequency = paste("n =",length(agecat)))
+delayed_recall_vline_means <-ddply(delayed_recall, c("device", "agecat"), summarise,
+                mean = mean(delayed_recall_correct, na.rm = TRUE))
+c <- ggplot()  + geom_histogram(data = delayed_recall, breaks = seq(5,20, by = .75), aes( y =..ncount.., x = delayed_recall$delayed_recall_correct), col = "black", fill = "purple" ) 
+              
+c + facet_grid(agecat ~ device) +  labs(title="Delayed Recall") +
+  labs(x="Delayed Recall Correct (#)", y="Frequency") +
+  geom_vline(data = delayed_recall_vline_means, aes(xintercept = mean),linetype = "dashed", color = "pink", size = .65) +
+ geom_text(data = delayed_recall_n, aes(x = 11, y= .8, label=frequency),size = 3,colour="black", inherit.aes=FALSE, parse=FALSE) + theme(panel.spacing = unit(.75, "lines"))
+
+
+````
+
+
+
+
+
+
+

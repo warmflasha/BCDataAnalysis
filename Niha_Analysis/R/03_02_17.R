@@ -133,3 +133,6 @@ normal_pop_updated <- normal_pop %>% full_join(combined, by =c("user_id", "date_
 
 normal_pop_updated <- normal_pop_updated %>% select(-c(X,administered_at.x, completed_at.x, completed_at.y, speedometer_score.x, speedometer_score.y, notes.x, notes_updated_at.y, notes_updated_at.x, notes_updated_at.y, malingering.x, malingering.y))
 
+
+
+write.csv(normal_pop_updated, file = "normal_pop_2017_03_02.csv")

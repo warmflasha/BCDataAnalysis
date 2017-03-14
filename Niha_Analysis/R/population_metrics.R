@@ -69,4 +69,4 @@ flanker["Test"] <- "flanker_reaction_time_correct_median"
 population_stats <- stroop %>% bind_rows(digit_symbol, immediate_recall, delayed_recall, balance, trails, flanker)
 
 csv_view <- population_stats %>% select(mean, SD, N, device, agecat, Test )
-write.csv(csv_view, file = "population-data-2017-02-24.csv")
+
