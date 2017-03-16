@@ -7,6 +7,8 @@ library('RPostgreSQL')
 
 path <- "feather/02_10_17.feather"
 normal_pop <- read_feather(path)
+
+
 research_batteries <- tbl(src_postgres("researchdb"),"batteries")
 research_users <- tbl(src_postgres("researchdb"), "users")
 production_batteries <- tbl(src_postgres("productiondb"), "batteries")

@@ -1,15 +1,16 @@
 source("R/load_libraries.R")
-source("R/03_02_17.R")
 setwd("~/Data-Analysis-BrainCheck/Niha_Analysis")
-#path <- "feather/02_10_17.feather"
-#dat <- read_feather(path)
 
-df <- normal_pop_updated %>% select(age, device_model, stroop_reaction_time_incongruent_median,digit_symbol_duration_median, immediate_recall_correct,delayed_recall_correct, balance_mean_distance_from_center, trails_b_duration_mean, flanker_reaction_time_correct_median)
+path <-"/Users/Niha/Data-Analysis-BrainCheck/Niha_Analysis/cleaned_data/03_14_17.csv"
+df <- read.csv(path, stringsAsFactors = FALSE)
+
+
+df <-df %>% select(age, device_model, stroop_reaction_time_incongruent_median,digit_symbol_duration_median, immediate_recall_correct,delayed_recall_correct, balance_mean_distance_from_center, trails_b_duration_mean, flanker_reaction_time_correct_median)
 
 ##NEW AGE BINS
-#df$agecat <-cut(df$age, c(10,14,19,36, 51, 66, 76,120), right = FALSE, labels = c("10-13", "14-18", "19-35", "36-50", "51-65", "66-75", "76+"))
+df$agecat <-cut(df$age, c(10,14,19,36, 51, 66, 76,120), right = FALSE, labels = c("10-13", "14-18", "19-35", "36-50", "51-65", "66-75", "76+"))
 ##OLD AGE BINS 
-df$agecat <-cut(df$age, c(0,10,14,19,36, 51, 66,120), right = FALSE, labels = c("0-9", "10-13", "14-18", "19-35", "36-50", "51-65", "66-120"))
+# df$agecat <-cut(df$age, c(0,10,14,19,36, 51, 66,120), right = FALSE, labels = c("0-9", "10-13", "14-18", "19-35", "36-50", "51-65", "66-120"))
 df$device <- NA
 df$device[grepl("iPhone",df$device_model)] <- "iPhone"
 df$device[grepl("iPad", df$device_model)] <- "iPad"
@@ -70,3 +71,7 @@ population_stats <- stroop %>% bind_rows(digit_symbol, immediate_recall, delayed
 
 csv_view <- population_stats %>% select(mean, SD, N, device, agecat, Test )
 
+#minified_view
+minimal <- population_stats %>% select(N, device, agecat, Test )
+minimal <- minimal %>% mutate(remainder = (30 - N))
+write.csv(minimal, "data_collection_status.csv")
