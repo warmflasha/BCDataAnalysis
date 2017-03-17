@@ -1,7 +1,7 @@
 source("R/load_libraries.R")
 setwd("~/Data-Analysis-BrainCheck/Niha_Analysis")
 
-path <-"/Users/Niha/Data-Analysis-BrainCheck/Niha_Analysis/cleaned_data/03_14_17.csv"
+path <-"/Users/Niha/Data-Analysis-BrainCheck/Niha_Analysis/cleaned_data/03_17_17.csv"
 df <- read.csv(path, stringsAsFactors = FALSE)
 
 

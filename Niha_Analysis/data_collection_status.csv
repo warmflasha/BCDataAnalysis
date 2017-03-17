@@ -13,7 +13,7 @@
 "12",57,"iPad","51-65","stroop_reaction_time_incongruent_median",-27
 "13",60,"iPad","66-75","stroop_reaction_time_incongruent_median",-30
 "14",25,"iPad","76+","stroop_reaction_time_incongruent_median",5
-"15",1,"iPhone","14-18","stroop_reaction_time_incongruent_median",29
+"15",14,"iPhone","14-18","stroop_reaction_time_incongruent_median",16
 "16",39,"iPhone","19-35","stroop_reaction_time_incongruent_median",-9
 "17",16,"iPhone","36-50","stroop_reaction_time_incongruent_median",14
 "18",10,"iPhone","51-65","stroop_reaction_time_incongruent_median",20
@@ -33,7 +33,7 @@
 "32",47,"iPad","51-65","digit_symbol_duration_median",-17
 "33",49,"iPad","66-75","digit_symbol_duration_median",-19
 "34",20,"iPad","76+","digit_symbol_duration_median",10
-"35",1,"iPhone","14-18","digit_symbol_duration_median",29
+"35",14,"iPhone","14-18","digit_symbol_duration_median",16
 "36",39,"iPhone","19-35","digit_symbol_duration_median",-9
 "37",16,"iPhone","36-50","digit_symbol_duration_median",14
 "38",10,"iPhone","51-65","digit_symbol_duration_median",20
@@ -53,7 +53,7 @@
 "52",57,"iPad","51-65","immediate_recall_correct",-27
 "53",60,"iPad","66-75","immediate_recall_correct",-30
 "54",25,"iPad","76+","immediate_recall_correct",5
-"55",1,"iPhone","14-18","immediate_recall_correct",29
+"55",14,"iPhone","14-18","immediate_recall_correct",16
 "56",39,"iPhone","19-35","immediate_recall_correct",-9
 "57",16,"iPhone","36-50","immediate_recall_correct",14
 "58",10,"iPhone","51-65","immediate_recall_correct",20
@@ -73,7 +73,7 @@
 "72",57,"iPad","51-65","delayed_recall_correct",-27
 "73",60,"iPad","66-75","delayed_recall_correct",-30
 "74",25,"iPad","76+","delayed_recall_correct",5
-"75",1,"iPhone","14-18","delayed_recall_correct",29
+"75",14,"iPhone","14-18","delayed_recall_correct",16
 "76",39,"iPhone","19-35","delayed_recall_correct",-9
 "77",16,"iPhone","36-50","delayed_recall_correct",14
 "78",10,"iPhone","51-65","delayed_recall_correct",20
@@ -86,7 +86,7 @@
 "85",23,"iPad","51-65","balance_mean_distance_from_center",7
 "86",16,"iPad","66-75","balance_mean_distance_from_center",14
 "87",6,"iPad","76+","balance_mean_distance_from_center",24
-"88",1,"iPhone","14-18","balance_mean_distance_from_center",29
+"88",14,"iPhone","14-18","balance_mean_distance_from_center",16
 "89",38,"iPhone","19-35","balance_mean_distance_from_center",-8
 "90",16,"iPhone","36-50","balance_mean_distance_from_center",14
 "91",10,"iPhone","51-65","balance_mean_distance_from_center",20
@@ -106,7 +106,7 @@
 "105",57,"iPad","51-65","trails_b_duration_mean",-27
 "106",60,"iPad","66-75","trails_b_duration_mean",-30
 "107",25,"iPad","76+","trails_b_duration_mean",5
-"108",1,"iPhone","14-18","trails_b_duration_mean",29
+"108",14,"iPhone","14-18","trails_b_duration_mean",16
 "109",39,"iPhone","19-35","trails_b_duration_mean",-9
 "110",16,"iPhone","36-50","trails_b_duration_mean",14
 "111",10,"iPhone","51-65","trails_b_duration_mean",20
@@ -126,7 +126,7 @@
 "125",38,"iPad","51-65","flanker_reaction_time_correct_median",-8
 "126",37,"iPad","66-75","flanker_reaction_time_correct_median",-7
 "127",17,"iPad","76+","flanker_reaction_time_correct_median",13
-"128",1,"iPhone","14-18","flanker_reaction_time_correct_median",29
+"128",14,"iPhone","14-18","flanker_reaction_time_correct_median",16
 "129",39,"iPhone","19-35","flanker_reaction_time_correct_median",-9
 "130",16,"iPhone","36-50","flanker_reaction_time_correct_median",14
 "131",10,"iPhone","51-65","flanker_reaction_time_correct_median",20
