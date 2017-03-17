@@ -1,0 +1,12 @@
+name: "BrainCheck Data Projects"
+navbar:
+  title: "BrainCheck Data Projects"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Normative Data"
+      href: normative.html
+    - text: "TCH Data Analysis"
+      href: tch.html
+    - text: "Google Analytics"
+      href: google_analytics.html
