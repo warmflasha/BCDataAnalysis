@@ -2,7 +2,7 @@ function batteries = addAssessmentDataToBatteries(datadir,batteries)
 
 assessfile = dir([datadir filesep 'assess*.csv']);
 fid = fopen(fullfile(datadir,assessfile(1).name),'r');
-fgetl(fid); tline = fgetl(fid);
+tline = fgetl(fid);
 
 while tline ~= -1
     tline = fixcommas(tline);

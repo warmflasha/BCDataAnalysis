@@ -22,6 +22,7 @@ classdef Battery < handle
         recall
         digitSym
         flanker
+        matrix
         trailsAB
         digitSpan
         stroop
@@ -98,6 +99,16 @@ classdef Battery < handle
         %A battery is complete if it contains all assessments
         function comp = is_complete(obj)
             if ~isempty(obj.ebbinghaus) && ~isempty(obj.digitSym) && ~isempty(obj.flanker) ...
+                    && ~isempty(obj.trailsAB) && ~isempty(obj.stroop)...
+                    && ~isempty(obj.recall) %&&   ~isempty(obj.balance)
+                comp = true;
+            else
+                comp=false;
+            end
+        end
+        
+        function comp = is_complete_dementia(obj)
+            if  ~isempty(obj.digitSym) && ~isempty(obj.matrix) ...
                     && ~isempty(obj.trailsAB) && ~isempty(obj.stroop)...
                     && ~isempty(obj.recall) %&&   ~isempty(obj.balance)
                 comp = true;
@@ -200,10 +211,21 @@ classdef Battery < handle
             md=median(dur);
         end
         
+        function md=digit_symbol_duration_per_trial_median(obj)
+            dur=[obj.digitSym.duration]./[obj.digitSym.number_attempts];
+            md=median(dur);
+        end
+        
         function cpsm = digit_symbol_correct_per_second_mean(obj)
             dur = [obj.digitSym.duration];
             ntrial = length(obj.digitSym);
             cpsm = ntrial/sum(dur);
+        end
+        
+          function fic = digit_symbol_fraction_incorrect(obj)
+            correct = length(obj.digitSym);
+            total = sum([obj.digitSym.number_attempts]);
+            fic = (total-correct)/total;
         end
         %Removes Trails reaction times more than 3 sds from the mean
         function obj=removeBadTrailsData(obj)
@@ -362,7 +384,7 @@ classdef Battery < handle
             end
         end
         
-        function sbrt = stroop_basic_reaction_time_mean(obj)
+        function sbrt = stroop_N_reaction_time_mean(obj)
             if isempty(obj.stroop)
                 disp('No Stroop data for this battery');
                 return;
@@ -373,7 +395,7 @@ classdef Battery < handle
             end
         end
         
-        function sbrt = stroop_C_reaction_time(obj)
+        function sbrt = stroop_C_reaction_time_mean(obj)
             if isempty(obj.stroop)
                 disp('No Stroop data for this battery');
                 return;
@@ -384,7 +406,39 @@ classdef Battery < handle
             end
         end
         
-         function sbrt = stroop_reaction_time_incongruent_median(obj)
+        function sbrt = stroop_I_reaction_time_mean(obj)
+            if isempty(obj.stroop)
+                disp('No Stroop data for this battery');
+                return;
+            else
+                inds=[obj.stroop.trial_type]=='I';
+                tt=[obj.stroop.reaction_time];
+                sbrt=meannonan(tt(inds));
+            end
+        end
+        
+        function sbrt = stroop_I_reaction_time_median(obj)
+            if isempty(obj.stroop)
+                disp('No Stroop data for this battery');
+                return;
+            else
+                inds=[obj.stroop.trial_type]=='I';
+                tt=[obj.stroop.reaction_time];
+                sbrt=mediannonan(tt(inds));
+            end
+        end
+        
+        function sbrt = stroop_N_reaction_time_median(obj)
+            if isempty(obj.stroop)
+                disp('No Stroop data for this battery');
+                return;
+            else
+                inds=[obj.stroop.trial_type]=='N';
+                tt=[obj.stroop.reaction_time];
+                sbrt=mediannonan(tt(inds));
+            end
+        end
+        function sbrt = stroop_C_reaction_time_median(obj)
             if isempty(obj.stroop)
                 disp('No Stroop data for this battery');
                 return;
@@ -394,8 +448,7 @@ classdef Battery < handle
                 sbrt=mediannonan(tt(inds));
             end
         end
-        
-        function sbrt = stroop_reaction_time(obj)
+        function sbrt = stroop_reaction_time_mean(obj)
             if isempty(obj.stroop)
                 disp('No Stroop data for this battery');
                 return;
@@ -405,7 +458,7 @@ classdef Battery < handle
             end
         end
         
-        function se = stroop_effect_ms_mean(obj)
+        function se = stroop_effect_diff_mean(obj)
             if isempty(obj.stroop)
                 disp('No Stroop data for this battery');
                 return;
@@ -419,7 +472,7 @@ classdef Battery < handle
             end
         end
         
-        function ser = stroop_effect_ratio(obj)
+        function ser = stroop_effect_ratio_mean(obj)
             if isempty(obj.stroop)
                 disp('No Stroop data for this battery');
                 return;
@@ -457,6 +510,24 @@ classdef Battery < handle
             end
             mdist = mean(mdist_all);
             
+        end
+        
+        function fnm = balance_fraction_not_moving(obj)
+            fnm = obj.balance.fraction_not_moving(0.5);
+        end
+        
+        function fcorrect = matrix_fraction_correct(obj,firstN)
+            ntotal = length([obj.matrix]);
+            if ~exist('firstN','var') || firstN > ntotal
+                firstN = ntotal;
+            end
+            correctArray = [obj.matrix.correct];
+            correctArray = correctArray(1:firstN);
+            ncorrect = sum(correctArray);
+            fcorrect = ncorrect/firstN;
+        end
+        function med = matrix_duration_median(obj)
+            med = median([obj.matrix.duration]);
         end
     end
 end

@@ -8,7 +8,6 @@ outdat = zeros(nbatteries,nmethods);
 for bb=1:nbatteries
     for mm=1:nmethods
         try
-            disp(['batteries(' int2str(bb) ').' methodnames{mm}]);
             outp =eval(['batteries(' int2str(bb) ').' methodnames{mm}]);
             if ~isempty(outp)
                 outdat(bb,mm)=outp;

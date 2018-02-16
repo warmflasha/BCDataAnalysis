@@ -60,6 +60,20 @@ classdef Balance
             td = sum(sqrt(sum(dat.*dat,2)));
             
         end
+        
+        function fnm = fraction_not_moving(obj,thresh)
+            xy = obj.xy_data;
+            for ii = 1:size(xy,1)-1
+                dist = sqrt((xy(ii,1)-xy(ii+1,1)).^2+(xy(ii,2)-xy(ii+1,2)));
+                if dist < thresh
+                    nm(ii) = true;
+                else
+                    nm(ii) = false;
+                end
+                
+            end
+            fnm = sum(nm)/length(nm);
+        end
     end
     
 end

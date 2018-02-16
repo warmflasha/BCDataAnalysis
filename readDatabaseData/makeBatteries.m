@@ -2,7 +2,7 @@ function batteries=makeBatteries(datadirs,metadatafile,oldestdate)
 % Main function that makes the batteries data structure. datadirs is a cell
 % array of folder names containing the data. metadatafile is the name of
 % the file containing the metadata, oldestdate is an optional argument.
-% Batteries collected before this date will be skipped. 
+% Batteries collected before this date will be skipped.
 
 q = 1;
 
@@ -17,10 +17,10 @@ for ii = 1:length(datadirs)
     f1=dir([datadir filesep 'batter*.csv']);
     f1=f1(1).name;
     fid=fopen([datadir filesep f1],'r');
-    tline=fgetl(fid); tline=fgetl(fid);
+    tline=fgetl(fid);
     while tline ~=-1
         disp(int2str(q));
-        if length(tline) < 200 %too short to be real data.
+        if length(tline) < 50 %too short to be real data.
             tline = fgetl(fid);
             continue;
         end
@@ -31,9 +31,9 @@ for ii = 1:length(datadirs)
             batteries(q) = newBattery;
             q = q+1;
         else
-            if newBattery.admin_by == 1242
+            %if newBattery.admin_by == 1242
             disp(['Skipping battery ' int2str(newBattery.id) ': too old or duplicate']);
-            end
+            %end
         end
         tline = fgetl(fid);
     end
@@ -56,14 +56,24 @@ for ii = 1:length(datadirs)
     batteries(badinds)=[];
     batterylookup = mkBatteryLookup(batteries);
     
+    disp('Reading Balance');
     batteries=readBalance(datadir,batteries,batterylookup,ii);
+    disp('Reading DigitSpan');
     batteries=readDigitSpan(datadir,batteries,batterylookup,ii);
+    disp('Reading DigitSym');
     batteries=readDigitSym(datadir,batteries,batterylookup,ii);
+    disp('Reading Recall');
     batteries=readRecall(datadir,batteries,batterylookup,ii);
+    disp('Reading Ebbinghaus');
     batteries=readEbbinghaus(datadir,batteries,batterylookup,ii);
+    disp('Reading Flanker');
     batteries=readFlanker(datadir,batteries,batterylookup,ii);
+    disp('Reading Stroop');
     batteries=readStroop(datadir,batteries,batterylookup,ii);
+    disp('Reading Trails');
     batteries=readTrailsAB(datadir,batteries,batterylookup,ii);
+    disp('Reading Matrix');
+    batteries=readMatrix(datadir,batteries,batterylookup,ii);
     
 end
 
@@ -75,7 +85,7 @@ for ii = 1:length(batteries)
     if isempty(batteries(ii).assessments) || all(isnan(batteries(ii).assessments))
         badbatteries(ii) = true;
         if batteries(ii).admin_by==1242
-        disp(['Removing battery ' int2str(batteries(ii).id) ': Empty battery']);
+            disp(['Removing battery ' int2str(batteries(ii).id) ': Empty battery']);
         end
     end
 end
@@ -94,7 +104,7 @@ function batteries=readBalance(datadir,batteries,batterylookup,filenum)
 f1=dir([datadir filesep 'balance*.csv']);
 f1=f1(1).name;
 fid=fopen([datadir filesep f1],'r');
-fgetl(fid); line=fgetl(fid);
+ line=fgetl(fid);
 
 while line ~=-1
     
@@ -116,7 +126,11 @@ while line ~=-1
     
     dat=strsplit(line,',');
     assess_num = str2double(dat{2});
-    batnum=batterylookup(assess_num);
+    if assess_num <= length(batterylookup)
+        batnum=batterylookup(assess_num);
+    else
+        batnum = 0;
+    end
     newBalance = Balance(dat,xydat);
     if batnum > 0
         
@@ -146,13 +160,17 @@ function batteries=readDigitSpan(datadir,batteries,batterylookup,filenum)
 f1=dir([datadir filesep 'digit_span*.csv']);
 f1=f1(1).name;
 fid=fopen([datadir filesep f1],'r');
-fgetl(fid); line=fgetl(fid);
+ line=fgetl(fid);
 
 while line ~=-1
     line = fixcommas(line);
     dat=strsplit(line,',');
     assess_num=str2double(dat{2});
-    batnum=batterylookup(assess_num);
+    if assess_num <= length(batterylookup)
+        batnum=batterylookup(assess_num);
+    else
+        batnum = 0;
+    end
     newDigitSpan = DigitSpan(dat);
     if batnum > 0
         
@@ -182,14 +200,18 @@ function batteries=readDigitSym(datadir,batteries,batterylookup,filenum)
 f1=dir([datadir filesep 'digit_symbol*.csv']);
 f1=f1(1).name;
 fid=fopen([datadir filesep f1],'r');
-fgetl(fid); line=fgetl(fid);
+line=fgetl(fid);
 
 while line ~=-1
     line = fixcommas(line);
     
     dat=strsplit(line,',');
     assess_num=str2double(dat{2});
-    batnum=batterylookup(assess_num);
+    if assess_num <= length(batterylookup)
+        batnum=batterylookup(assess_num);
+    else
+        batnum = 0;
+    end
     if batnum > 0
         
         newDigitSym = DigitSym(dat);
@@ -222,7 +244,7 @@ function batteries=readRecall(datadir,batteries,batterylookup,filenum)
 f1=dir([datadir filesep '*recall*.csv']);
 f1=f1(1).name;
 fid=fopen([datadir filesep f1],'r');
-fgetl(fid); line=fgetl(fid);
+ line=fgetl(fid);
 
 while line ~=-1
     line = fixcommas(line);
@@ -230,7 +252,11 @@ while line ~=-1
     dat=strsplit(line,',');
     
     assess_num=str2double(dat{2});
-    batnum=batterylookup(assess_num);
+    if assess_num <= length(batterylookup)
+        batnum=batterylookup(assess_num);
+    else
+        batnum = 0;
+    end
     newRecall = Recall(dat);
     if batnum > 0
         
@@ -261,7 +287,7 @@ function batteries=readEbbinghaus(datadir,batteries,batterylookup,filenum)
 f1=dir([datadir filesep 'ebbinghaus*.csv']);
 f1=f1(1).name;
 fid=fopen([datadir filesep f1],'r');
-fgetl(fid); line=fgetl(fid);
+line=fgetl(fid);
 
 while line ~=-1
     line = fixcommas(line);
@@ -269,7 +295,11 @@ while line ~=-1
     dat=strsplit(line,',');
     
     assess_num=str2double(dat{2});
-    batnum=batterylookup(assess_num);
+    if assess_num <= length(batterylookup)
+        batnum=batterylookup(assess_num);
+    else
+        batnum = 0;
+    end
     newEbb = Ebbinghaus(dat);
     if batnum > 0
         
@@ -300,13 +330,20 @@ function batteries=readFlanker(datadir,batteries,batterylookup,filenum)
 f1=dir([datadir filesep 'flanker*.csv']);
 f1=f1(1).name;
 fid=fopen([datadir filesep f1],'r');
-fgetl(fid); line=fgetl(fid);
+line=fgetl(fid);
 
 while line ~=-1
     line = fixcommas(line);
     
     dat=strsplit(line,',');
+    
     assess_num=str2double(dat{2});
+    
+    if assess_num <= length(batterylookup)
+        batnum=batterylookup(assess_num);
+    else
+        batnum = 0;
+    end
     batnum=batterylookup(assess_num);
     newFlanker = Flanker(dat);
     if batnum > 0
@@ -334,6 +371,48 @@ while line ~=-1
     line=fgetl(fid);
 end
 
+function batteries=readMatrix(datadir,batteries,batterylookup,filenum)
+f1=dir([datadir filesep 'matrix*.csv']);
+f1=f1(1).name;
+fid=fopen([datadir filesep f1],'r');
+line=fgetl(fid);
+
+while line ~=-1
+    line = fixcommas(line);
+    
+    dat=strsplit(line,',');
+    assess_num=str2double(dat{2});
+    if assess_num <= length(batterylookup)
+        batnum=batterylookup(assess_num);
+    else
+        batnum = 0;
+    end
+    newMatrix = Matrix(dat);
+    if batnum > 0
+        
+        ind = batteries(batnum).assessments == assess_num;
+        
+        if isempty(ind)
+            disp('Warning assessment not found in battery');
+            line = fgetl(fid);
+            continue;
+        elseif batteries(batnum).assessment_present(ind) > 0 && batteries(batnum).assessment_present(ind) < filenum
+            line = fgetl(fid);
+            continue;
+        end
+        
+        if isempty(batteries(batnum).matrix)
+            batteries(batnum).matrix = newMatrix;
+        else
+            batteries(batnum).matrix(end+1)=newMatrix;
+        end
+        batteries(batnum).assessment_present(ind) = filenum;
+        batteries(batnum).assessment_type{ind} = 'Matrix';
+        
+    end
+    line=fgetl(fid);
+end
+
 function batteries=readStroop(datadir,batteries,batterylookup,filenum)
 f1=dir([datadir filesep 'stroop*.csv']);
 if isempty(f1)
@@ -342,14 +421,18 @@ end
 
 f1=f1(1).name;
 fid=fopen([datadir filesep f1],'r');
-fgetl(fid); line=fgetl(fid);
+line=fgetl(fid);
 
 while line ~=-1
     line = fixcommas(line);
     
     dat=strsplit(line,',');
     assess_num=str2double(dat{2});
-    batnum=batterylookup(assess_num);
+    if assess_num <= length(batterylookup)
+        batnum=batterylookup(assess_num);
+    else
+        batnum = 0;
+    end
     newStroop = Stroop(dat);
     if batnum > 0
         
@@ -385,7 +468,7 @@ end
 
 f1=f1(1).name;
 fid=fopen([datadir filesep f1],'r');
-fgetl(fid); line=fgetl(fid);
+ line=fgetl(fid);
 
 
 
@@ -394,7 +477,11 @@ while line ~=-1
     
     dat=strsplit(line,',');
     assess_num=str2double(dat{2});
-    batnum=batterylookup(assess_num);
+    if assess_num <= length(batterylookup)
+        batnum=batterylookup(assess_num);
+    else
+        batnum = 0;
+    end
     newAB = TrailsAB(dat);
     if batnum > 0
         

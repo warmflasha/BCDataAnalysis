@@ -3,12 +3,12 @@
 % name in the corresponding entry in outfiles. 
 
 
-indirec = '/Users/Niha/Dropbox/Concussion_v3/unity_data_jan_17';
-outdirec = 'jan_combined';
+indirec = 'CKD';
+outdirec = 'CKD Combined';
 keywords = {'batteries','balanc','delayed','digit_span','digit_sym','ebbing','flanker',...
-    'stroop','trails','assessments','symptoms','users_2'};
+    'stroop','trails','assessments','symptoms','users_2','matrix'};
 outfiles = {'battery','balance','recall','digit_span','digit_symbol','ebbinghaus',...
-    'flanker','stroop','trails_ab','assessments','symptoms','users'};
+    'flanker','stroop','trails_ab','assessments','symptoms','users','matrix'};
 
 %make the output directory if necessary
 if ~exist(outdirec,'file')
