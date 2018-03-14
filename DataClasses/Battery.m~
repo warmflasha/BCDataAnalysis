@@ -248,10 +248,6 @@ classdef Battery < handle
             end
         end
         
-        function ct=trails_a_duration_mean(obj)
-            ct = obj.trails_cognitive_time_sec_mean;
-        end
-        
         % Trails B - computes the mean trial duration for trails B
         function et=trails_executive_time_sec_mean(obj)
             if isempty(obj.trailsAB)
@@ -265,7 +261,7 @@ classdef Battery < handle
         end
         
         function et=trails_b_duration_mean(obj)
-            et = obj.trails_executive_time_sec_mean;
+            et = obj.trails_executive_time_sec_me
         end
         
         % Trails AB - computes the mean trial duration for trails A
@@ -574,7 +570,7 @@ classdef Battery < handle
             metrics = {'immediate_recall_fraction_correct','delayed_recall_fraction_correct','stroop_reaction_time_mean','trails_cognitive_time_sec_mean','trails_executive_time_sec_mean',...
                 'matrix_fraction_correct','digit_symbol_correct_per_second_mean'};
             maxes = [1, 1, 21.39, 5.484, 15, 1,  0.967 ];
-            weights = 100/30*[5, 5, 5, 5, 0, 5, 5];
+            weights = [5, 5, 5, 5, 0, 5, 5];
             posneg = [1, 1, -1, -1, -1, 1, 1];
             comp_score = obj.compute_composite_score_helper(metrics,weights,maxes,posneg);
          end
@@ -583,7 +579,7 @@ classdef Battery < handle
              metrics = {'immediate_recall_fraction_correct','delayed_recall_fraction_correct','stroop_reaction_time_mean','trails_cognitive_time_sec_mean','trails_executive_time_sec_mean',...
                 'digit_symbol_correct_per_second_mean'};
             maxes = [1, 1, 21.39, 5.484, 15,  0.967 ];
-            weights = 100/30*[6, 6, 6, 6, 0, 6];
+            weights = [6, 6, 6, 6, 0, 6];
             posneg = [1, 1, -1, -1, -1, 1];
             comp_score = obj.compute_composite_score_helper(metrics,weights,maxes,posneg);
          end
